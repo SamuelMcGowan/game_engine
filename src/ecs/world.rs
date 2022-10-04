@@ -9,7 +9,7 @@ pub struct EntityId(pub(super) usize);
 #[derive(Default)]
 pub struct World {
     entity_count: usize,
-    storage_lookup: AllStorages,
+    all_storages: AllStorages,
 }
 
 impl World {
@@ -35,13 +35,13 @@ impl Deref for World {
     type Target = AllStorages;
 
     fn deref(&self) -> &Self::Target {
-        &self.storage_lookup
+        &self.all_storages
     }
 }
 
 impl DerefMut for World {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.storage_lookup
+        &mut self.all_storages
     }
 }
 
