@@ -1,4 +1,4 @@
-use super::sparse::{Iter, IterMut, SparseSet};
+use super::sparse_set::{Iter, IterMut, SparseSet};
 use super::storage::Storage;
 use super::world::EntityId;
 

@@ -1,4 +1,4 @@
-mod sparse;
+mod sparse_set;
 
 pub mod components;
 pub mod storage;
