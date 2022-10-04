@@ -1,10 +1,12 @@
 const PAGE_SIZE: usize = 64;
 
+#[derive(Debug)]
 struct DenseEntry<T> {
     sparse_index: usize,
     element: T,
 }
 
+#[derive(Debug)]
 pub struct SparseSet<T> {
     lookup: Lookup,
     dense: Vec<DenseEntry<T>>,
@@ -52,9 +54,20 @@ impl<T> SparseSet<T> {
     pub fn remove(&mut self, index: usize) -> Option<T> {
         match self.lookup.get(index) {
             Some(dense_index) => {
-                let entry = self.dense.swap_remove(dense_index);
-                self.lookup.swap_remove(index, entry.sparse_index);
-                Some(entry.element)
+                // Swap-remove the element from the dense-array.
+                let removed = self.dense.swap_remove(dense_index);
+
+                // If we swapped an element, update sparse-array entry for the swapped
+                // element now located where the removed element previously was.
+                if dense_index != self.dense.len() {
+                    let sparse_swapped_index = self.dense[dense_index].sparse_index;
+                    self.lookup.set(sparse_swapped_index, index);
+                }
+
+                // Remove the sparse-array entry for the removed element.
+                self.lookup.remove(index);
+
+                Some(removed.element)
             }
             None => None,
         }
@@ -89,7 +102,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct LookupPage {
     entries: Box<[Option<usize>; PAGE_SIZE]>,
 }
@@ -102,7 +115,7 @@ impl Default for LookupPage {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Lookup {
     pages: Vec<Option<LookupPage>>,
 }
@@ -118,16 +131,19 @@ impl Lookup {
         self.get_or_create_page(page_index).entries[offset] = Some(dense_index);
     }
 
-    fn swap_remove(&mut self, remove_index: usize, swap_index: usize) {
-        let remove_dense_index = self.remove(remove_index).unwrap();
-        self.set(swap_index, remove_dense_index);
-    }
-
-    fn remove(&mut self, index: usize) -> Option<usize> {
+    /// Panics if index isn't a valid entry.
+    fn remove(&mut self, index: usize) {
         let (page_index, offset) = page_index(index);
 
-        let entries = &mut self.pages.get_mut(page_index)?.as_mut()?.entries;
-        std::mem::take(&mut entries[offset])
+        let entries = &mut self
+            .pages
+            .get_mut(page_index)
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .entries;
+
+        entries[offset] = None;
     }
 
     fn get_or_create_page(&mut self, page_index: usize) -> &mut LookupPage {
