@@ -1,7 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
 use super::components::Component;
-use super::storage::{StorageLookup, Storage};
+use super::storage::{AllStorages, Storage};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EntityId(pub(super) usize);
@@ -9,7 +9,7 @@ pub struct EntityId(pub(super) usize);
 #[derive(Default)]
 pub struct World {
     entity_count: usize,
-    storage_lookup: StorageLookup,
+    storage_lookup: AllStorages,
 }
 
 impl World {
@@ -25,7 +25,7 @@ impl World {
 }
 
 impl Deref for World {
-    type Target = StorageLookup;
+    type Target = AllStorages;
 
     fn deref(&self) -> &Self::Target {
         &self.storage_lookup

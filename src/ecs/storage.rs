@@ -17,11 +17,11 @@ pub trait Storage {
 }
 
 #[derive(Default)]
-pub struct StorageLookup {
+pub struct AllStorages {
     components: HashMap<TypeId, Box<dyn Any>>,
 }
 
-impl StorageLookup {
+impl AllStorages {
     pub fn register_components<C: Component>(&mut self) -> Result<(), EcsError> {
         let type_id = TypeId::of::<C>();
 
