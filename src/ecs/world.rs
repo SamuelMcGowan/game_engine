@@ -13,6 +13,7 @@ pub struct World {
 }
 
 impl World {
+    /// Spawn a new entity and create a builder for it.
     pub fn spawn(&mut self) -> EntityBuilder {
         let id = self.entity_count;
         self.entity_count += 1;
@@ -23,6 +24,7 @@ impl World {
         }
     }
 
+    /// Get a builder for an entity.
     pub fn entity(&mut self, entity: EntityId) -> EntityBuilder {
         EntityBuilder {
             world: self,
@@ -51,6 +53,7 @@ pub struct EntityBuilder<'a> {
 }
 
 impl EntityBuilder<'_> {
+    /// Add a component to the entity.
     pub fn with<C: Component>(&mut self, component: C) -> &mut Self {
         let components = self
             .world
@@ -60,6 +63,7 @@ impl EntityBuilder<'_> {
         self
     }
 
+    /// Get the entity's id.
     pub fn id(&self) -> EntityId {
         self.entity
     }
