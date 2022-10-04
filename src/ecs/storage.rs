@@ -34,23 +34,23 @@ impl AllStorages {
         }
     }
 
-    pub fn components<C: Component>(&self) -> Option<&ComponentStorage<C>> {
+    pub fn component_storage<C: Component>(&self) -> Option<&ComponentStorage<C>> {
         let type_id = TypeId::of::<C>();
         let erased_storage = self.components.get(&type_id)?;
         Some(erased_storage.downcast_ref().unwrap())
     }
 
-    pub fn components_mut<C: Component>(&mut self) -> Option<&mut ComponentStorage<C>> {
+    pub fn component_storage_mut<C: Component>(&mut self) -> Option<&mut ComponentStorage<C>> {
         let type_id = TypeId::of::<C>();
         let erased_storage = self.components.get_mut(&type_id)?;
         Some(erased_storage.downcast_mut().unwrap())
     }
 
     pub fn component<C: Component>(&self, entity: EntityId) -> Option<&C> {
-        self.components::<C>()?.get(entity)
+        self.component_storage::<C>()?.get(entity)
     }
 
     pub fn component_mut<C: Component>(&mut self, entity: EntityId) -> Option<&mut C> {
-        self.components_mut::<C>()?.get_mut(entity)
+        self.component_storage_mut::<C>()?.get_mut(entity)
     }
 }

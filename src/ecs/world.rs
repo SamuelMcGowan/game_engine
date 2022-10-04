@@ -45,7 +45,7 @@ pub struct EntityBuilder<'a> {
 
 impl EntityBuilder<'_> {
     pub fn with<C: Component>(&mut self, component: C) -> &mut Self {
-        let components = self.world.components_mut::<C>().expect("component type not registered");
+        let components = self.world.component_storage_mut::<C>().expect("component type not registered");
         components.insert(self.entity, component);
         self
     }
