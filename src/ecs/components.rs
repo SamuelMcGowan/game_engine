@@ -1,4 +1,4 @@
-use super::sparse::SparseSet;
+use super::sparse::{Iter, IterMut, SparseSet};
 use super::storage::Storage;
 use super::world::EntityId;
 
@@ -14,7 +14,7 @@ impl<C: Component> Default for ComponentStorage<C> {
 
 impl<C: Component> Storage for ComponentStorage<C> {
     type Item = C;
-    
+
     fn get(&self, entity: EntityId) -> Option<&C> {
         self.0.get(entity.0)
     }
@@ -29,5 +29,15 @@ impl<C: Component> Storage for ComponentStorage<C> {
 
     fn remove(&mut self, entity: EntityId) -> Option<C> {
         self.0.remove(entity.0)
+    }
+}
+
+impl<C: Component> ComponentStorage<C> {
+    pub fn iter(&self) -> Iter<C> {
+        self.0.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<C> {
+        self.0.iter_mut()
     }
 }
