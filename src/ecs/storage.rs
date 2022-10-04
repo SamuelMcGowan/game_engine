@@ -6,16 +6,6 @@ use super::components::{Component, ComponentStorage};
 use super::world::EntityId;
 use super::EcsError;
 
-pub trait Storage {
-    type Item;
-
-    fn get(&self, entity: EntityId) -> Option<&Self::Item>;
-    fn get_mut(&mut self, entity: EntityId) -> Option<&mut Self::Item>;
-
-    fn insert(&mut self, entity: EntityId, element: Self::Item) -> Option<Self::Item>;
-    fn remove(&mut self, entity: EntityId) -> Option<Self::Item>;
-}
-
 #[derive(Default)]
 pub struct AllStorages {
     components: HashMap<TypeId, Box<dyn Any>>,

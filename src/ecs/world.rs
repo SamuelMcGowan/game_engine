@@ -1,7 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
 use super::components::Component;
-use super::storage::{AllStorages, Storage};
+use super::storage::AllStorages;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EntityId(pub(super) usize);

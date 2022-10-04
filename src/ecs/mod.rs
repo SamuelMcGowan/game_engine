@@ -11,8 +11,6 @@ pub enum EcsError {
 
 #[cfg(test)]
 mod tests {
-    use crate::ecs::storage::Storage;
-
     use super::components::Component;
     use super::world::World;
 
