@@ -1,1 +1,1 @@
-mod ecs;
+pub mod ecs;

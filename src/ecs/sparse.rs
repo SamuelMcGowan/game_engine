@@ -10,7 +10,26 @@ pub struct SparseSet<T> {
     dense: Vec<DenseEntry<T>>,
 }
 
+impl<T> Default for SparseSet<T> {
+    fn default() -> Self {
+        Self {
+            lookup: Lookup::default(),
+            dense: vec![],
+        }
+    }
+}
+
 impl<T> SparseSet<T> {
+    pub fn get(&self, index: usize) -> Option<&T> {
+        let dense_index = self.lookup.get(index)?;
+        Some(&self.dense[dense_index].element)
+    }
+
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+        let dense_index = self.lookup.get(index)?;
+        Some(&mut self.dense[dense_index].element)
+    }
+
     pub fn insert(&mut self, index: usize, element: T) -> Option<T> {
         let entry = DenseEntry {
             sparse_index: index,
@@ -41,12 +60,32 @@ impl<T> SparseSet<T> {
         }
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &T> + '_ {
-        self.dense.iter().map(|entry| &entry.element)
+    pub fn iter(&self) -> Iter<T> {
+        Iter(self.dense.iter())
     }
 
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut T> + '_ {
-        self.dense.iter_mut().map(|entry| &mut entry.element)
+    pub fn iter_mut(&mut self) -> IterMut<T> {
+        IterMut(self.dense.iter_mut())
+    }
+}
+
+pub struct Iter<'a, T>(std::slice::Iter<'a, DenseEntry<T>>);
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|entry| &entry.element)
+    }
+}
+
+pub struct IterMut<'a, T>(std::slice::IterMut<'a, DenseEntry<T>>);
+
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|entry| &mut entry.element)
     }
 }
 
@@ -63,6 +102,7 @@ impl Default for LookupPage {
     }
 }
 
+#[derive(Default)]
 struct Lookup {
     pages: Vec<Option<LookupPage>>,
 }
@@ -91,7 +131,7 @@ impl Lookup {
     }
 
     fn get_or_create_page(&mut self, page_index: usize) -> &mut LookupPage {
-        if page_index < self.pages.len() {
+        if page_index >= self.pages.len() {
             let none_pages = self.pages.len();
             self.pages.reserve(none_pages + 1);
             self.pages.extend(std::iter::repeat(None).take(none_pages));
