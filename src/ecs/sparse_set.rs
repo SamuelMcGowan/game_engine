@@ -8,14 +8,14 @@ struct DenseEntry<T> {
 
 #[derive(Debug)]
 pub struct SparseSet<T> {
-    lookup: Lookup,
+    sparse: SparseArray,
     dense: Vec<DenseEntry<T>>,
 }
 
 impl<T> Default for SparseSet<T> {
     fn default() -> Self {
         Self {
-            lookup: Lookup::default(),
+            sparse: SparseArray::default(),
             dense: vec![],
         }
     }
@@ -23,12 +23,12 @@ impl<T> Default for SparseSet<T> {
 
 impl<T> SparseSet<T> {
     pub fn get(&self, index: usize) -> Option<&T> {
-        let dense_index = self.lookup.get(index)?;
+        let dense_index = self.sparse.get(index)?;
         Some(&self.dense[dense_index].element)
     }
 
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
-        let dense_index = self.lookup.get(index)?;
+        let dense_index = self.sparse.get(index)?;
         Some(&mut self.dense[dense_index].element)
     }
 
@@ -38,21 +38,21 @@ impl<T> SparseSet<T> {
             element,
         };
 
-        match self.lookup.get(index) {
+        match self.sparse.get(index) {
             Some(dense_index) => {
                 let prev = std::mem::replace(&mut self.dense[dense_index], entry);
                 Some(prev.element)
             }
             None => {
                 self.dense.push(entry);
-                self.lookup.set(index, self.dense.len() - 1);
+                self.sparse.set(index, self.dense.len() - 1);
                 None
             }
         }
     }
 
     pub fn remove(&mut self, index: usize) -> Option<T> {
-        match self.lookup.get(index) {
+        match self.sparse.get(index) {
             Some(dense_index) => {
                 // Swap-remove the element from the dense-array.
                 let removed = self.dense.swap_remove(dense_index);
@@ -61,11 +61,11 @@ impl<T> SparseSet<T> {
                 // element now located where the removed element previously was.
                 if dense_index != self.dense.len() {
                     let sparse_swapped_index = self.dense[dense_index].sparse_index;
-                    self.lookup.set(sparse_swapped_index, index);
+                    self.sparse.set(sparse_swapped_index, index);
                 }
 
                 // Remove the sparse-array entry for the removed element.
-                self.lookup.remove(index);
+                self.sparse.remove(index);
 
                 Some(removed.element)
             }
@@ -103,11 +103,11 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 }
 
 #[derive(Debug, Clone)]
-struct LookupPage {
+struct SparseArrayPage {
     entries: Box<[Option<usize>; PAGE_SIZE]>,
 }
 
-impl Default for LookupPage {
+impl Default for SparseArrayPage {
     fn default() -> Self {
         Self {
             entries: Box::new([None; PAGE_SIZE]),
@@ -116,11 +116,11 @@ impl Default for LookupPage {
 }
 
 #[derive(Default, Debug)]
-struct Lookup {
-    pages: Vec<Option<LookupPage>>,
+struct SparseArray {
+    pages: Vec<Option<SparseArrayPage>>,
 }
 
-impl Lookup {
+impl SparseArray {
     fn get(&self, index: usize) -> Option<usize> {
         let (page_index, offset) = page_index(index);
         *self.pages.get(page_index)?.as_ref()?.entries.get(offset)?
@@ -146,12 +146,12 @@ impl Lookup {
         entries[offset] = None;
     }
 
-    fn get_or_create_page(&mut self, page_index: usize) -> &mut LookupPage {
+    fn get_or_create_page(&mut self, page_index: usize) -> &mut SparseArrayPage {
         if page_index >= self.pages.len() {
             let none_pages = self.pages.len();
             self.pages.reserve(none_pages + 1);
             self.pages.extend(std::iter::repeat(None).take(none_pages));
-            self.pages.push(Some(LookupPage::default()));
+            self.pages.push(Some(SparseArrayPage::default()));
         }
         self.pages[page_index].as_mut().unwrap()
     }
