@@ -13,8 +13,8 @@ fn adding_components() {
     let a = world.spawn().with(Foo(10)).id();
     let b = world.spawn().with(Foo(20)).id();
 
-    assert_eq!(world.component::<Foo>(a), Some(&Foo(10)));
-    assert_eq!(world.component::<Foo>(b), Some(&Foo(20)));
+    assert_eq!(world.component::<Foo>(a).as_deref(), Ok(&Foo(10)));
+    assert_eq!(world.component::<Foo>(b).as_deref(), Ok(&Foo(20)));
 }
 
 #[test]
@@ -28,8 +28,8 @@ fn remove_a() {
     let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
     assert_eq!(a_foo, Some(Foo(10)));
 
-    assert_eq!(world.component::<Foo>(a), None);
-    assert_eq!(world.component::<Foo>(b), Some(&Foo(20)));
+    assert!(world.component::<Foo>(a).as_deref().is_err());
+    assert_eq!(world.component::<Foo>(b).as_deref(), Ok(&Foo(20)));
 }
 
 #[test]
@@ -43,8 +43,8 @@ fn remove_b() {
     let b_foo = world.component_storage_mut::<Foo>().unwrap().remove(b);
     assert_eq!(b_foo, Some(Foo(20)));
 
-    assert_eq!(world.component::<Foo>(a), Some(&Foo(10)));
-    assert_eq!(world.component::<Foo>(b), None);
+    assert_eq!(world.component::<Foo>(a).as_deref(), Ok(&Foo(10)));
+    assert!(world.component::<Foo>(b).as_deref().is_err());
 }
 
 #[test]
@@ -61,8 +61,8 @@ fn remove_both() {
     assert_eq!(a_foo, Some(Foo(10)));
     assert_eq!(b_foo, Some(Foo(20)));
 
-    assert_eq!(world.component::<Foo>(a), None);
-    assert_eq!(world.component::<Foo>(b), None);
+    assert!(world.component::<Foo>(a).as_deref().is_err());
+    assert!(world.component::<Foo>(b).as_deref().is_err());
 }
 
 #[test]
@@ -88,9 +88,9 @@ fn add_again() {
     let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
 
     assert_eq!(a_foo, Some(Foo(10)));
-    assert_eq!(world.component::<Foo>(a), None);
+    assert!(world.component::<Foo>(a).as_deref().is_err());
 
     world.entity(a).with(Foo(20));
 
-    assert_eq!(world.component::<Foo>(a), Some(&Foo(20)));
+    assert_eq!(world.component::<Foo>(a).as_deref(), Ok(&Foo(20)));
 }
