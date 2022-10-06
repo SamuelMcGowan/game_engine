@@ -7,39 +7,6 @@ use super::components::{Component, ComponentStorage};
 use super::world::EntityId;
 use super::EcsError;
 
-// pub struct DoubleRef<'a, T> {
-//     r: Ref<'a, RefCell<T>>,
-// }
-
-// impl<'a, T> DoubleRef<'a, T> {
-//     fn borrow(&self) -> Ref<T> {
-//         self.r.borrow()
-//     }
-
-//     fn map<F, U>(dr: DoubleRef<'a, T>, f: F) -> DoubleRef<'a, U>
-//     where
-//         F: FnOnce(&T) -> &U,
-//     {
-//         let r = Ref::map(dr.r, |r| {
-
-//         });
-//     }
-// }
-
-// pub struct DoubleRefMut<'a, T> {
-//     r: RefMut<'a, RefCell<T>>,
-// }
-
-// impl<T> DoubleRefMut<'_, T> {
-//     fn borrow(&self) -> Ref<T> {
-//         self.r.borrow()
-//     }
-
-//     fn borrow_mut(&self) -> RefMut<T> {
-//         self.r.borrow_mut()
-//     }
-// }
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BorrowError {
     InvalidBorrow,
