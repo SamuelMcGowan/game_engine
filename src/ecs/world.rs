@@ -2,7 +2,7 @@ use std::ops::{Deref, DerefMut};
 
 use super::components::Component;
 use super::storage::AllStorages;
-use super::system::{System, SystemError};
+use super::system::{System, SystemOutput, SystemResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EntityId(pub(super) usize);
@@ -33,10 +33,10 @@ impl World {
         }
     }
 
-    pub fn run<'a, S: System<'a, P>, P>(
+    pub fn run<'a, S: System<'a, Params, Output>, Params, Output: SystemOutput>(
         &'a mut self,
         mut system: S,
-    ) -> Result<(), SystemError<S::Error>> {
+    ) -> SystemResult<Output::Success, Output::Error> {
         system.run(self)
     }
 }

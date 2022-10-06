@@ -1,7 +1,7 @@
 use crate::ecs::system::Query;
 
 use super::components::Component;
-use super::system::QueryMut;
+use super::system::{QueryMut, SystemError};
 use super::world::World;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -133,6 +133,18 @@ fn system_mut() {
             assert_eq!(query.get(b), Some(&Foo(20)));
         })
         .unwrap();
+}
+
+#[test]
+fn system_failure() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    let result = world.run(|| -> Result<(), &'static str> {
+        Err("hello, world!")
+    });
+
+    assert_eq!(result, Err(SystemError::ExecutionError("hello, world!")))
 }
 
 #[test]
