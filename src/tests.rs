@@ -1,5 +1,5 @@
 use crate::storage::Component;
-use crate::system::{Query, QueryMut, SystemError};
+use crate::system::{Query, QueryMut, SystemError, UniqueMut, Unique};
 use crate::world::World;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -103,6 +103,14 @@ fn add_unique() {
 
     world.insert_unique(100usize).unwrap();
     assert_eq!(world.unique_ref().as_deref(), Ok(&100usize));
+
+    world.run(|mut num: UniqueMut<usize>| {
+        *num.get_mut() = 200;
+    }).unwrap();
+
+    world.run(|num: Unique<usize>| {
+        assert_eq!(*num.get(), 200);
+    }).unwrap()
 }
 
 #[test]
