@@ -1,4 +1,7 @@
+use crate::ecs::system::Query;
+
 use super::components::Component;
+use super::system::QueryMut;
 use super::world::World;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -93,4 +96,55 @@ fn add_again() {
     world.entity(a).with(Foo(20));
 
     assert_eq!(world.component::<Foo>(a).as_deref(), Ok(&Foo(20)));
+}
+
+#[test]
+fn iter() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    let a = world.spawn().with(Foo(10)).id();
+    let b = world.spawn().with(Foo(20)).id();
+
+    world
+        .run(|query: Query<Foo>| {
+            let sum: usize = query.iter().map(|foo| foo.0).sum();
+            assert_eq!(sum, 30);
+
+            assert_eq!(query.get(a), Some(&Foo(10)));
+            assert_eq!(query.get(b), Some(&Foo(20)));
+        })
+        .unwrap();
+}
+
+#[test]
+fn system_mut() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    let a = world.spawn().with(Foo(10)).id();
+    let b = world.spawn().with(Foo(20)).id();
+
+    world
+        .run(|mut query: QueryMut<Foo>| {
+            *query.get_mut(a).unwrap() = Foo(30);
+
+            assert_eq!(query.get(a), Some(&Foo(30)));
+            assert_eq!(query.get(b), Some(&Foo(20)));
+        })
+        .unwrap();
+}
+
+#[test]
+#[should_panic]
+fn system_borrow_conflict() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    world.spawn().with(Foo(10)).id();
+    world.spawn().with(Foo(20)).id();
+
+    world
+        .run(|_q1: QueryMut<Foo>, _q2: QueryMut<Foo>| {})
+        .unwrap();
 }
