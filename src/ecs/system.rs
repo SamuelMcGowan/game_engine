@@ -80,16 +80,17 @@ impl<'a, C: Component> QueryMut<'a, C> {
 }
 
 macro_rules! impl_system {
-    ($($P:ident $p:ident),*) => {
+    ($($P:ident),*) => {
         impl<'a, F, $($P: SystemParam<'a>),*>
-        System<'a, ($($P,)*)> for F
-        where F: FnMut($($P),*) {
+            System<'a, ($($P,)*)>
+            for F
+            where F: FnMut($($P),*)
+        {
             type Error = ();
 
             #[allow(unused_variables)]
             fn run(&mut self, world: &'a World) -> Result<(), SystemError<Self::Error>> {
-                $(let $p = $P::borrow(world)?;)*
-                (self)($($p),*);
+                (self)($($P::borrow(world)?),*);
                 Ok(())
             }
         }
@@ -97,5 +98,5 @@ macro_rules! impl_system {
 }
 
 impl_system!();
-impl_system!(Q0 q0);
-impl_system!(Q0 q0, Q1 q1);
+impl_system!(Q0);
+impl_system!(Q0, Q1);
