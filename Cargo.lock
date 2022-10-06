@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "gameengine"
+name = "sycamore_ecs"
 version = "0.1.0"
