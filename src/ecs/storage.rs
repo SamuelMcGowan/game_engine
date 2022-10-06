@@ -74,6 +74,7 @@ impl AllStorages {
             .components
             .get(&type_id)
             .ok_or(BorrowError::StorageNotFound)?;
+
         let erased_storage_ref = erased_storage
             .try_borrow()
             .map_err(|_| BorrowError::InvalidBorrow)?;
@@ -92,6 +93,7 @@ impl AllStorages {
             .components
             .get(&type_id)
             .ok_or(BorrowError::StorageNotFound)?;
+
         let erased_storage_mut = erased_storage
             .try_borrow_mut()
             .map_err(|_| BorrowError::InvalidBorrow)?;
