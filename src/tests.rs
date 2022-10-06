@@ -97,6 +97,15 @@ fn add_again() {
 }
 
 #[test]
+fn add_unique() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    world.insert_unique(100usize).unwrap();
+    assert_eq!(world.unique_ref().as_deref(), Ok(&100usize));
+}
+
+#[test]
 fn iter() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
