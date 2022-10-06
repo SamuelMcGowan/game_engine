@@ -141,10 +141,17 @@ fn system_borrow_conflict() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    world.spawn().with(Foo(10)).id();
-    world.spawn().with(Foo(20)).id();
+    world.spawn().with(Foo(10));
+    world.spawn().with(Foo(20));
 
     world
         .run(|_q1: QueryMut<Foo>, _q2: QueryMut<Foo>| {})
         .unwrap();
+}
+
+#[test]
+#[should_panic]
+fn storage_missing() {
+    let mut world = World::default();
+    world.spawn().with(Foo(10));
 }
