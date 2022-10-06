@@ -1,8 +1,6 @@
-use crate::ecs::system::Query;
-
-use super::components::Component;
-use super::system::{QueryMut, SystemError};
-use super::world::World;
+use crate::storage::Component;
+use crate::system::{Query, QueryMut, SystemError};
+use crate::world::World;
 
 #[derive(Debug, PartialEq, Eq)]
 struct Foo(usize);
@@ -140,9 +138,7 @@ fn system_failure() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let result = world.run(|| -> Result<(), &'static str> {
-        Err("hello, world!")
-    });
+    let result = world.run(|| -> Result<(), &'static str> { Err("hello, world!") });
 
     assert_eq!(result, Err(SystemError::ExecutionError("hello, world!")))
 }

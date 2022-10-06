@@ -1,11 +1,8 @@
 use std::cell::{Ref, RefMut};
 
-use crate::ecs::components::{Component, ComponentStorage};
-use crate::ecs::sparse_set::{Iter, IterMut};
-use crate::ecs::storage::BorrowResult;
-use crate::ecs::world::{EntityId, World};
-
 use super::SystemParam;
+use crate::storage::*;
+use crate::world::{EntityId, World};
 
 pub struct Query<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,

@@ -1,7 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use super::components::Component;
-use super::storage::AllStorages;
+use super::storage::{AllStorages, Component};
 use super::system::{System, SystemOutput, SystemResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

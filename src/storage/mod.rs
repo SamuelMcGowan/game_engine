@@ -1,11 +1,15 @@
+mod components;
+mod sparse_set;
+
 use std::any::{Any, TypeId};
 use std::cell::{Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use super::components::{Component, ComponentStorage};
 use super::world::EntityId;
 use super::EcsError;
+
+pub use components::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BorrowError {
