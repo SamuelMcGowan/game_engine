@@ -1,9 +1,11 @@
+mod unique;
 mod query;
 
 use super::storage::{BorrowError, BorrowResult};
 use super::world::World;
 
 pub use query::*;
+pub use unique::*;
 
 pub trait System<'a, Params, Output: SystemOutput> {
     fn run(&mut self, world: &'a World) -> SystemResult<Output::Success, Output::Error>;
