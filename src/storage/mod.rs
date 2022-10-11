@@ -30,22 +30,22 @@ impl AllStorages {
         self.components.insert(ComponentStorage::<C>::default())
     }
 
-    pub fn all_components_ref<C: Component>(&self) -> BorrowResult<Ref<ComponentStorage<C>>> {
+    pub fn component_storage_ref<C: Component>(&self) -> BorrowResult<Ref<ComponentStorage<C>>> {
         self.components.borrow_ref()
     }
 
-    pub fn all_components_mut<C: Component>(&self) -> BorrowResult<RefMut<ComponentStorage<C>>> {
+    pub fn component_storage_mut<C: Component>(&self) -> BorrowResult<RefMut<ComponentStorage<C>>> {
         self.components.borrow_mut()
     }
 
     pub fn component_ref<C: Component>(&self, entity: EntityId) -> BorrowResult<Ref<C>> {
-        let storage = self.all_components_ref::<C>()?;
+        let storage = self.component_storage_ref::<C>()?;
         Ref::filter_map(storage, |storage| storage.get(entity))
             .map_err(|_| BorrowError::ValueNotFound)
     }
 
     pub fn component_mut<C: Component>(&self, entity: EntityId) -> BorrowResult<RefMut<C>> {
-        let storage = self.all_components_mut::<C>()?;
+        let storage = self.component_storage_mut::<C>()?;
         RefMut::filter_map(storage, |storage| storage.get_mut(entity))
             .map_err(|_| BorrowError::ValueNotFound)
     }

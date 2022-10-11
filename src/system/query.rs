@@ -69,7 +69,7 @@ impl<'a, T: Any> UniqueMut<'a, T> {
 impl<'a, C: Component> SystemParam<'a> for Query<'a, C> {
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_components_ref()?,
+            storage: world.component_storage_ref()?,
         })
     }
 }
@@ -77,7 +77,7 @@ impl<'a, C: Component> SystemParam<'a> for Query<'a, C> {
 impl<'a, C: Component> SystemParam<'a> for QueryMut<'a, C> {
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_components_mut()?,
+            storage: world.component_storage_mut()?,
         })
     }
 }

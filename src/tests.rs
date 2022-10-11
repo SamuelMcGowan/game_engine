@@ -1,5 +1,5 @@
 use crate::storage::Component;
-use crate::system::{Query, QueryMut, SystemError, UniqueMut, Unique};
+use crate::system::{Query, QueryMut, SystemError, Unique, UniqueMut};
 use crate::world::World;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -26,7 +26,7 @@ fn remove_a() {
     let a = world.spawn().with(Foo(10)).id();
     let b = world.spawn().with(Foo(20)).id();
 
-    let a_foo = world.all_components_mut::<Foo>().unwrap().remove(a);
+    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
     assert_eq!(a_foo, Some(Foo(10)));
 
     assert!(world.component_ref::<Foo>(a).as_deref().is_err());
@@ -41,7 +41,7 @@ fn remove_b() {
     let a = world.spawn().with(Foo(10)).id();
     let b = world.spawn().with(Foo(20)).id();
 
-    let b_foo = world.all_components_mut::<Foo>().unwrap().remove(b);
+    let b_foo = world.component_storage_mut::<Foo>().unwrap().remove(b);
     assert_eq!(b_foo, Some(Foo(20)));
 
     assert_eq!(world.component_ref::<Foo>(a).as_deref(), Ok(&Foo(10)));
@@ -56,8 +56,8 @@ fn remove_both() {
     let a = world.spawn().with(Foo(10)).id();
     let b = world.spawn().with(Foo(20)).id();
 
-    let a_foo = world.all_components_mut::<Foo>().unwrap().remove(a);
-    let b_foo = world.all_components_mut::<Foo>().unwrap().remove(b);
+    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
+    let b_foo = world.component_storage_mut::<Foo>().unwrap().remove(b);
 
     assert_eq!(a_foo, Some(Foo(10)));
     assert_eq!(b_foo, Some(Foo(20)));
@@ -73,8 +73,8 @@ fn remove_twice() {
 
     let a = world.spawn().with(Foo(10)).id();
 
-    let a_foo = world.all_components_mut::<Foo>().unwrap().remove(a);
-    let a_foo_again = world.all_components_mut::<Foo>().unwrap().remove(a);
+    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
+    let a_foo_again = world.component_storage_mut::<Foo>().unwrap().remove(a);
 
     assert_eq!(a_foo, Some(Foo(10)));
     assert_eq!(a_foo_again, None);
@@ -86,7 +86,7 @@ fn add_again() {
     world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().with(Foo(10)).id();
-    let a_foo = world.all_components_mut::<Foo>().unwrap().remove(a);
+    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
 
     assert_eq!(a_foo, Some(Foo(10)));
     assert!(world.component_ref::<Foo>(a).as_deref().is_err());
@@ -104,13 +104,17 @@ fn add_unique() {
     world.insert_unique(100usize).unwrap();
     assert_eq!(world.unique_ref().as_deref(), Ok(&100usize));
 
-    world.run(|mut num: UniqueMut<usize>| {
-        *num.get_mut() = 200;
-    }).unwrap();
+    world
+        .run(|mut num: UniqueMut<usize>| {
+            *num.get_mut() = 200;
+        })
+        .unwrap();
 
-    world.run(|num: Unique<usize>| {
-        assert_eq!(*num.get(), 200);
-    }).unwrap()
+    world
+        .run(|num: Unique<usize>| {
+            assert_eq!(*num.get(), 200);
+        })
+        .unwrap()
 }
 
 #[test]
