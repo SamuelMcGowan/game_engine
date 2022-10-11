@@ -4,8 +4,3 @@ pub mod world;
 
 #[cfg(test)]
 mod tests;
-
-#[derive(Debug)]
-pub enum EcsError {
-    StorageAlreadyAdded,
-}
