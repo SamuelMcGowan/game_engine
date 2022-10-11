@@ -80,6 +80,10 @@ impl<T> SparseSet<T> {
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut(self.dense.iter_mut())
     }
+
+    pub fn contains(&self, index: usize) -> bool {
+        self.sparse.get(index).is_some()
+    }
 }
 
 pub struct Iter<'a, T>(std::slice::Iter<'a, DenseEntry<T>>);

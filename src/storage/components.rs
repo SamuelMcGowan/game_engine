@@ -36,4 +36,8 @@ impl<C: Component> ComponentStorage<C> {
     pub fn iter_mut(&mut self) -> IterMut<C> {
         self.0.iter_mut()
     }
+
+    pub fn contains(&self, entity: EntityId) -> bool {
+        self.0.contains(entity.0)
+    }
 }

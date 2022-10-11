@@ -30,6 +30,10 @@ impl<'a, C: Component> Query<'a, C> {
     pub fn iter(&self) -> Iter<C> {
         self.storage.iter()
     }
+
+    pub fn contains(&self, entity: EntityId) -> bool {
+        self.storage.contains(entity)
+    }
 }
 
 impl<'a, C: Component> QueryMut<'a, C> {
@@ -47,6 +51,10 @@ impl<'a, C: Component> QueryMut<'a, C> {
 
     pub fn iter_mut(&mut self) -> IterMut<C> {
         self.storage.iter_mut()
+    }
+
+    pub fn contains(&self, entity: EntityId) -> bool {
+        self.storage.contains(entity)
     }
 }
 
