@@ -22,11 +22,13 @@ impl<T> Default for SparseSet<T> {
 }
 
 impl<T> SparseSet<T> {
+    #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
         let dense_index = self.sparse.get(index)?;
         Some(&self.dense[dense_index].element)
     }
 
+    #[inline]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         let dense_index = self.sparse.get(index)?;
         Some(&mut self.dense[dense_index].element)
@@ -73,14 +75,17 @@ impl<T> SparseSet<T> {
         }
     }
 
+    #[inline]
     pub fn iter(&self) -> Iter<T> {
         Iter(self.dense.iter())
     }
 
+    #[inline]
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut(self.dense.iter_mut())
     }
 
+    #[inline]
     pub fn contains(&self, index: usize) -> bool {
         self.sparse.get(index).is_some()
     }
@@ -91,6 +96,7 @@ pub struct Iter<'a, T>(std::slice::Iter<'a, DenseEntry<T>>);
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(|entry| &entry.element)
     }
@@ -101,6 +107,7 @@ pub struct IterMut<'a, T>(std::slice::IterMut<'a, DenseEntry<T>>);
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(|entry| &mut entry.element)
     }

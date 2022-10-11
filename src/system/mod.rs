@@ -41,6 +41,7 @@ impl<S, E> SystemOutput for Result<S, E> {
     type Success = S;
     type Error = E;
 
+    #[inline]
     fn to_result(self) -> SystemResult<Self::Success, Self::Error> {
         self.map_err(SystemError::ExecutionError)
     }

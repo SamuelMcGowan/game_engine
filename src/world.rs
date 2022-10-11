@@ -14,6 +14,7 @@ pub struct World {
 
 impl World {
     /// Spawn a new entity and create a builder for it.
+    #[inline]
     pub fn spawn(&mut self) -> EntityBuilder {
         let id = self.entity_count;
         self.entity_count += 1;
@@ -25,6 +26,7 @@ impl World {
     }
 
     /// Get a builder for an entity.
+    #[inline]
     pub fn entity(&mut self, entity: EntityId) -> EntityBuilder {
         EntityBuilder {
             world: self,
@@ -43,12 +45,14 @@ impl World {
 impl Deref for World {
     type Target = AllStorages;
 
+    #[inline]
     fn deref(&self) -> &Self::Target {
         &self.all_storages
     }
 }
 
 impl DerefMut for World {
+    #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.all_storages
     }
@@ -72,6 +76,7 @@ impl EntityBuilder<'_> {
     }
 
     /// Get the entity's id.
+    #[inline]
     pub fn id(&self) -> EntityId {
         self.entity
     }
