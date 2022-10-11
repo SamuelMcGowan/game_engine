@@ -4,7 +4,9 @@ use std::ops::{Deref, DerefMut};
 
 use super::SystemParam;
 use crate::storage::*;
-use crate::world::{EntityId, World};
+use crate::world::World;
+
+// DEFINITIONS
 
 pub struct Query<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,
@@ -22,57 +24,53 @@ pub struct UniqueMut<'a, T: Any> {
     storage: RefMut<'a, T>,
 }
 
-impl<'a, C: Component> Query<'a, C> {
-    pub fn get(&self, entity: EntityId) -> Option<&C> {
-        self.storage.get(entity)
-    }
+// DEREF IMPLEMENTATIONS
 
-    pub fn iter(&self) -> Iter<C> {
-        self.storage.iter()
-    }
+impl<'a, C: Component> Deref for Query<'a, C> {
+    type Target = ComponentStorage<C>;
 
-    pub fn contains(&self, entity: EntityId) -> bool {
-        self.storage.contains(entity)
+    fn deref(&self) -> &Self::Target {
+        &self.storage
     }
 }
 
-impl<'a, C: Component> QueryMut<'a, C> {
-    pub fn get(&self, entity: EntityId) -> Option<&C> {
-        self.storage.get(entity)
-    }
+impl<'a, C: Component> Deref for QueryMut<'a, C> {
+    type Target = ComponentStorage<C>;
 
-    pub fn get_mut(&mut self, entity: EntityId) -> Option<&mut C> {
-        self.storage.get_mut(entity)
-    }
-
-    pub fn iter(&self) -> Iter<C> {
-        self.storage.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> IterMut<C> {
-        self.storage.iter_mut()
-    }
-
-    pub fn contains(&self, entity: EntityId) -> bool {
-        self.storage.contains(entity)
+    fn deref(&self) -> &Self::Target {
+        &self.storage
     }
 }
 
-impl<'a, T: Any> Unique<'a, T> {
-    pub fn get(&self) -> &T {
+impl<'a, C: Component> DerefMut for QueryMut<'a, C> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.storage
+    }
+}
+
+impl<'a, T: Any> Deref for Unique<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
         self.storage.deref()
     }
 }
 
-impl<'a, T: Any> UniqueMut<'a, T> {
-    pub fn get(&self) -> &T {
+impl<'a, T: Any> Deref for UniqueMut<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
         self.storage.deref()
     }
+}
 
-    pub fn get_mut(&mut self) -> &mut T {
+impl<'a, T: Any> DerefMut for UniqueMut<'a, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         self.storage.deref_mut()
     }
 }
+
+// SYSTEMPARAM IMPLEMENTATIONS
 
 impl<'a, C: Component> SystemParam<'a> for Query<'a, C> {
     fn borrow(world: &'a World) -> BorrowResult<Self> {

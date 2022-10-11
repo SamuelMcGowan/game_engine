@@ -106,13 +106,13 @@ fn add_unique() {
 
     world
         .run(|mut num: UniqueMut<usize>| {
-            *num.get_mut() = 200;
+            *num = 200;
         })
         .unwrap();
 
     world
         .run(|num: Unique<usize>| {
-            assert_eq!(*num.get(), 200);
+            assert_eq!(*num, 200);
         })
         .unwrap()
 }
