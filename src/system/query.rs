@@ -1,9 +1,8 @@
 use std::cell::{Ref, RefMut};
 use std::ops::{Deref, DerefMut};
 
-use super::SystemParam;
-use crate::world::*;
 use crate::storage::components::*;
+use crate::system::*;
 
 pub struct Query<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,

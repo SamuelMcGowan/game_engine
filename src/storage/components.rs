@@ -1,7 +1,5 @@
+use crate::storage::sparse_set::*;
 use crate::world::EntityId;
-
-use super::sparse_set::SparseSet;
-pub use super::sparse_set::{Iter, IterMut};
 
 pub trait Component: 'static {}
 

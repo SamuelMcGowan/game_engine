@@ -1,4 +1,4 @@
-use super::sparse_set::SparseSet;
+use crate::storage::sparse_set::SparseSet;
 
 // THANKS TO: https://skypjack.github.io/2019-05-06-ecs-baf-part-3/
 

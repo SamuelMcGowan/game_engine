@@ -1,6 +1,4 @@
-use crate::storage::components::Component;
-use crate::system::{Query, QueryMut, SystemError, Unique, UniqueMut};
-use crate::world::World;
+use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq)]
 struct Foo(usize);

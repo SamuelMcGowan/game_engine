@@ -2,9 +2,7 @@ use std::any::Any;
 use std::cell::{Ref, RefMut};
 use std::ops::{Deref, DerefMut};
 
-use crate::world::*;
-
-use super::SystemParam;
+use crate::system::*;
 
 pub struct Unique<'a, T: Any> {
     storage: Ref<'a, T>,

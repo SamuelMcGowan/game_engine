@@ -1,7 +1,7 @@
-mod unique;
 mod query;
+mod unique;
 
-use super::world::*;
+use crate::world::*;
 
 pub use query::*;
 pub use unique::*;
