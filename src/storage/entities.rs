@@ -99,30 +99,49 @@ impl EntityStorage {
     /// Check if an entity is alive.
     ///
     /// Panics if the entity isn't in this storage.
+    #[inline]
     pub fn is_alive(&self, entity: EntityId) -> bool {
         self.storage.get(entity.entity as usize).unwrap().version == entity.version
     }
 
     /// Try to convert this to a live entity.
-    pub fn get_alive(&self, entity: EntityId) -> Option<LiveEntity> {
+    #[inline]
+    pub fn try_entity_to_alive(&self, entity: EntityId) -> Option<LiveEntity> {
+        if !self.storage.contains(entity.entity as usize) {
+            panic!("entity {entity:?} not in this storage");
+        }
+
         if self.is_alive(entity) {
             Some(LiveEntity {
                 entity,
-                storage: self,
+                _storage: self,
             })
         } else {
             None
         }
+    }
+
+    /// Convert this to a live entity.
+    ///
+    /// Panics if the entity is not alive.
+    #[inline]
+    pub fn entity_to_alive(&self, entity: EntityId) -> LiveEntity {
+        self.try_entity_to_alive(entity)
+            .unwrap_or_else(|| panic!("entity {entity:?} not alive"))
     }
 }
 
 /// An alive entity.
 pub struct LiveEntity<'a> {
     entity: EntityId,
-    storage: &'a EntityStorage,
+    _storage: &'a EntityStorage,
 }
 
 impl<'a> LiveEntity<'a> {
+    pub fn get(&self) -> EntityId {
+        self.entity
+    }
+
     pub(super) fn index(&self) -> usize {
         self.entity.entity() as usize
     }

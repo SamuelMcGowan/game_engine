@@ -2,6 +2,7 @@ use std::any::Any;
 use std::cell::{Ref, RefMut};
 
 use crate::storage::components::*;
+use crate::storage::entities::{EntityId, EntityStorage, LiveEntity};
 use crate::storage::erased::{ErasedStorage, StorageOccupied};
 use crate::system::*;
 
@@ -14,12 +15,9 @@ pub enum BorrowError {
 
 pub type BorrowResult<T> = Result<T, BorrowError>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct EntityId(pub(crate) usize);
-
 #[derive(Default)]
 pub struct World {
-    entity_count: usize,
+    entities: EntityStorage,
     components: ErasedStorage,
     unique: ErasedStorage,
 }
@@ -28,12 +26,11 @@ impl World {
     /// Spawn a new entity and create a builder for it.
     #[inline]
     pub fn spawn(&mut self) -> EntityBuilder {
-        let id = self.entity_count;
-        self.entity_count += 1;
+        let entity = self.entities.spawn();
 
         EntityBuilder {
             world: self,
-            entity: EntityId(id),
+            entity,
         }
     }
 
@@ -46,39 +43,45 @@ impl World {
         }
     }
 
+    pub fn get<'a, P: SystemParam<'a>>(&'a self) -> P {
+        P::borrow(self).unwrap_or_else(|err| {
+            panic!("borrow error: {err:?}");
+        })
+    }
+
+    pub fn try_get<'a, P: SystemParam<'a>>(&'a self) -> BorrowResult<P> {
+        P::borrow(self)
+    }
+
     pub fn register_components<C: Component>(&mut self) -> Result<(), StorageOccupied> {
         self.components.insert(ComponentStorage::<C>::default())
     }
 
-    pub fn component_storage_ref<C: Component>(&self) -> BorrowResult<Ref<ComponentStorage<C>>> {
+    pub(crate) fn component_storage_ref<C: Component>(
+        &self,
+    ) -> BorrowResult<Ref<ComponentStorage<C>>> {
         self.components.borrow_ref()
     }
 
-    pub fn component_storage_mut<C: Component>(&self) -> BorrowResult<RefMut<ComponentStorage<C>>> {
+    pub(crate) fn component_storage_mut<C: Component>(
+        &self,
+    ) -> BorrowResult<RefMut<ComponentStorage<C>>> {
         self.components.borrow_mut()
     }
 
-    pub fn component_ref<C: Component>(&self, entity: EntityId) -> BorrowResult<Ref<C>> {
-        let storage = self.component_storage_ref::<C>()?;
-        Ref::filter_map(storage, |storage| storage.get(entity))
-            .map_err(|_| BorrowError::ValueNotFound)
-    }
-
-    pub fn component_mut<C: Component>(&self, entity: EntityId) -> BorrowResult<RefMut<C>> {
-        let storage = self.component_storage_mut::<C>()?;
-        RefMut::filter_map(storage, |storage| storage.get_mut(entity))
-            .map_err(|_| BorrowError::ValueNotFound)
+    pub(crate) fn entity_storage(&self) -> &EntityStorage {
+        &self.entities
     }
 
     pub fn insert_unique<T: Any>(&mut self, unique: T) -> Result<(), StorageOccupied> {
         self.unique.insert(unique)
     }
 
-    pub fn unique_ref<T: Any>(&self) -> BorrowResult<Ref<T>> {
+    pub(crate) fn unique_ref<T: Any>(&self) -> BorrowResult<Ref<T>> {
         self.unique.borrow_ref()
     }
 
-    pub fn unique_mut<T: Any>(&self) -> BorrowResult<RefMut<T>> {
+    pub(crate) fn unique_mut<T: Any>(&self) -> BorrowResult<RefMut<T>> {
         self.unique.borrow_mut()
     }
 
@@ -97,12 +100,12 @@ pub struct EntityBuilder<'a> {
 
 impl EntityBuilder<'_> {
     /// Add a component to the entity.
-    pub fn with<C: Component>(&mut self, component: C) -> &mut Self {
+    pub fn insert<C: Component>(&mut self, component: C) -> &mut Self {
         let mut components = self
             .world
             .component_storage_mut::<C>()
             .expect("component type not registered");
-        components.insert(self.entity, component);
+        components.insert(self.live(), component);
         drop(components);
         self
     }
@@ -111,5 +114,9 @@ impl EntityBuilder<'_> {
     #[inline]
     pub fn id(&self) -> EntityId {
         self.entity
+    }
+
+    fn live(&self) -> LiveEntity {
+        self.world.entities.entity_to_alive(self.entity)
     }
 }

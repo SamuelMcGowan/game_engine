@@ -12,6 +12,25 @@ pub struct UniqueMut<'a, T: Any> {
     storage: RefMut<'a, T>,
 }
 
+impl<'a, T: Any> Unique<'a, T> {
+    #[inline]
+    pub fn get(&self) -> &T {
+        &self.storage
+    }
+}
+
+impl<'a, T: Any> UniqueMut<'a, T> {
+    #[inline]
+    pub fn get(&self) -> &T {
+        &self.storage
+    }
+
+    #[inline]
+    pub fn get_mut(&mut self) -> &mut T {
+        &mut self.storage
+    }
+}
+
 impl<'a, T: Any> Deref for Unique<'a, T> {
     type Target = T;
 

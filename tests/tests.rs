@@ -1,4 +1,6 @@
-use crate::prelude::*;
+#![allow(clippy::blacklisted_name)]
+
+use sycamore_ecs::prelude::*;
 
 #[derive(Debug, PartialEq, Eq)]
 struct Foo(usize);
@@ -9,11 +11,11 @@ fn adding_components() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
-    let b = world.spawn().with(Foo(20)).id();
+    let a = world.spawn().insert(Foo(10)).id();
+    let b = world.spawn().insert(Foo(20)).id();
 
-    assert_eq!(world.component_ref::<Foo>(a).as_deref(), Ok(&Foo(10)));
-    assert_eq!(world.component_ref::<Foo>(b).as_deref(), Ok(&Foo(20)));
+    assert_eq!(world.get::<Query<Foo>>().get(a), Some(&Foo(10)));
+    assert_eq!(world.get::<Query<Foo>>().get(b), Some(&Foo(20)));
 }
 
 #[test]
@@ -21,14 +23,14 @@ fn remove_a() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
-    let b = world.spawn().with(Foo(20)).id();
+    let a = world.spawn().insert(Foo(10)).id();
+    let b = world.spawn().insert(Foo(20)).id();
 
-    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
+    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
     assert_eq!(a_foo, Some(Foo(10)));
 
-    assert!(world.component_ref::<Foo>(a).as_deref().is_err());
-    assert_eq!(world.component_ref::<Foo>(b).as_deref(), Ok(&Foo(20)));
+    assert!(world.get::<Query<Foo>>().get(a).is_none());
+    assert_eq!(world.get::<Query<Foo>>().get(b), Some(&Foo(20)));
 }
 
 #[test]
@@ -36,14 +38,14 @@ fn remove_b() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
-    let b = world.spawn().with(Foo(20)).id();
+    let a = world.spawn().insert(Foo(10)).id();
+    let b = world.spawn().insert(Foo(20)).id();
 
-    let b_foo = world.component_storage_mut::<Foo>().unwrap().remove(b);
+    let b_foo = world.get::<QueryMut<Foo>>().remove(b);
     assert_eq!(b_foo, Some(Foo(20)));
 
-    assert_eq!(world.component_ref::<Foo>(a).as_deref(), Ok(&Foo(10)));
-    assert!(world.component_ref::<Foo>(b).as_deref().is_err());
+    assert_eq!(world.get::<Query<Foo>>().get(a), Some(&Foo(10)));
+    assert!(world.get::<Query<Foo>>().get(b).is_none());
 }
 
 #[test]
@@ -51,17 +53,17 @@ fn remove_both() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
-    let b = world.spawn().with(Foo(20)).id();
+    let a = world.spawn().insert(Foo(10)).id();
+    let b = world.spawn().insert(Foo(20)).id();
 
-    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
-    let b_foo = world.component_storage_mut::<Foo>().unwrap().remove(b);
+    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
+    let b_foo = world.get::<QueryMut<Foo>>().remove(b);
 
     assert_eq!(a_foo, Some(Foo(10)));
     assert_eq!(b_foo, Some(Foo(20)));
 
-    assert!(world.component_ref::<Foo>(a).as_deref().is_err());
-    assert!(world.component_ref::<Foo>(b).as_deref().is_err());
+    assert!(world.get::<Query<Foo>>().get(a).is_none());
+    assert!(world.get::<Query<Foo>>().get(b).is_none());
 }
 
 #[test]
@@ -69,10 +71,10 @@ fn remove_twice() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
+    let a = world.spawn().insert(Foo(10)).id();
 
-    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
-    let a_foo_again = world.component_storage_mut::<Foo>().unwrap().remove(a);
+    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
+    let a_foo_again = world.get::<QueryMut<Foo>>().remove(a);
 
     assert_eq!(a_foo, Some(Foo(10)));
     assert_eq!(a_foo_again, None);
@@ -83,15 +85,15 @@ fn add_again() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
-    let a_foo = world.component_storage_mut::<Foo>().unwrap().remove(a);
+    let a = world.spawn().insert(Foo(10)).id();
+    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
 
     assert_eq!(a_foo, Some(Foo(10)));
-    assert!(world.component_ref::<Foo>(a).as_deref().is_err());
+    assert!(world.get::<Query<Foo>>().get(a).is_none());
 
-    world.entity(a).with(Foo(20));
+    world.entity(a).insert(Foo(20));
 
-    assert_eq!(world.component_ref::<Foo>(a).as_deref(), Ok(&Foo(20)));
+    assert_eq!(world.get::<Query<Foo>>().get(a), Some(&Foo(20)));
 }
 
 #[test]
@@ -100,7 +102,7 @@ fn add_unique() {
     world.register_components::<Foo>().unwrap();
 
     world.insert_unique(100usize).unwrap();
-    assert_eq!(world.unique_ref().as_deref(), Ok(&100usize));
+    assert_eq!(world.get::<Unique<usize>>().get(), &100usize);
 
     world
         .run(|mut num: UniqueMut<usize>| {
@@ -120,8 +122,8 @@ fn iter() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
-    let b = world.spawn().with(Foo(20)).id();
+    let a = world.spawn().insert(Foo(10)).id();
+    let b = world.spawn().insert(Foo(20)).id();
 
     world
         .run(|query: Query<Foo>| {
@@ -139,8 +141,8 @@ fn system_mut() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    let a = world.spawn().with(Foo(10)).id();
-    let b = world.spawn().with(Foo(20)).id();
+    let a = world.spawn().insert(Foo(10)).id();
+    let b = world.spawn().insert(Foo(20)).id();
 
     world
         .run(|mut query: QueryMut<Foo>| {
@@ -168,8 +170,8 @@ fn system_borrow_conflict() {
     let mut world = World::default();
     world.register_components::<Foo>().unwrap();
 
-    world.spawn().with(Foo(10));
-    world.spawn().with(Foo(20));
+    world.spawn().insert(Foo(10));
+    world.spawn().insert(Foo(20));
 
     world
         .run(|_q1: QueryMut<Foo>, _q2: QueryMut<Foo>| {})
@@ -180,5 +182,5 @@ fn system_borrow_conflict() {
 #[should_panic]
 fn storage_missing() {
     let mut world = World::default();
-    world.spawn().with(Foo(10));
+    world.spawn().insert(Foo(10));
 }

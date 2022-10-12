@@ -2,9 +2,6 @@ pub mod storage;
 pub mod system;
 pub mod world;
 
-#[cfg(test)]
-mod tests;
-
 pub mod prelude {
     use super::*;
 
