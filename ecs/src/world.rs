@@ -24,28 +24,28 @@ pub struct World {
 }
 
 impl World {
-    /// Spawn a new entity and create a builder for it.
+    /// Spawn a new entity and create a handle for it.
     #[inline]
-    pub fn spawn(&mut self) -> EntityBuilder {
+    pub fn spawn(&mut self) -> EntityMut {
         let entity = self.entities.spawn();
 
-        EntityBuilder {
+        EntityMut {
             world: self,
             entity,
         }
     }
 
-    /// Get a builder for an entity.
+    /// Get a handle for an entity.
     #[inline]
-    pub fn entity(&mut self, entity: EntityId) -> EntityBuilder {
-        EntityBuilder {
+    pub fn entity(&mut self, entity: EntityId) -> EntityMut {
+        EntityMut {
             world: self,
             entity,
         }
     }
 
     /// Get a query.
-    /// 
+    ///
     /// Panics upon failure.
     pub fn get<'a, P: SystemParam<'a>>(&'a self) -> P {
         P::borrow(self).unwrap_or_else(|err| {
@@ -101,19 +101,29 @@ impl World {
     }
 }
 
-pub struct EntityBuilder<'a> {
+/// A handle to mutate an entity.
+pub struct EntityMut<'a> {
     world: &'a mut World,
     entity: EntityId,
 }
 
-impl EntityBuilder<'_> {
+impl EntityMut<'_> {
     /// Add a component to the entity.
+    ///
+    /// Panics if the component type is not registered.
     pub fn insert<C: Component>(&mut self, component: C) -> &mut Self {
-        let mut components = self
-            .world
-            .component_storage_mut::<C>()
-            .expect("component type not registered");
+        let mut components = self.components_mut::<C>();
         components.insert(self.live(), component);
+        drop(components);
+        self
+    }
+
+    /// Remove a component from an entity.
+    ///
+    /// Panics if the component type is not registered.
+    pub fn remove<C: Component>(&mut self) -> &mut Self {
+        let mut components = self.components_mut::<C>();
+        components.remove(self.live());
         drop(components);
         self
     }
@@ -122,6 +132,13 @@ impl EntityBuilder<'_> {
     #[inline]
     pub fn id(&self) -> EntityId {
         self.entity
+    }
+
+    /// Panics if the component type is not registered.
+    fn components_mut<C: Component>(&self) -> RefMut<ComponentStorage<C>> {
+        self.world
+            .component_storage_mut::<C>()
+            .expect("component type not registered")
     }
 
     fn live(&self) -> LiveEntity {
