@@ -1,6 +1,6 @@
 #![allow(clippy::blacklisted_name)]
 
-use sycamore_ecs::prelude::*;
+use ecs::prelude::*;
 
 #[derive(Debug, PartialEq, Eq)]
 struct Foo(usize);

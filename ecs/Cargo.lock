@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "sycamore_ecs"
+name = "ecs"
 version = "0.1.0"
