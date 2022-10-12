@@ -1,9 +1,10 @@
 use std::cell::{Ref, RefMut};
 
+use crate::storage::all_storages::BorrowResult;
 use crate::storage::components::*;
 use crate::storage::entities::{EntityId, EntityStorage};
 use crate::system::*;
-use crate::world::{BorrowResult, World};
+use crate::world::World;
 
 pub struct Comp<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,
@@ -74,8 +75,8 @@ impl<'a, C: Component> SystemParam<'a> for Comp<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.component_storage_ref()?,
-            entities: world.entity_storage(),
+            storage: world.all_storages().component_storage_ref()?,
+            entities: world.all_storages().entity_storage(),
         })
     }
 }
@@ -84,8 +85,8 @@ impl<'a, C: Component> SystemParam<'a> for CompMut<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.component_storage_mut()?,
-            entities: world.entity_storage(),
+            storage: world.all_storages().component_storage_mut()?,
+            entities: world.all_storages().entity_storage(),
         })
     }
 }

@@ -1,9 +1,10 @@
+use crate::storage::all_storages::BorrowResult;
 use std::any::Any;
 use std::cell::{Ref, RefMut};
 use std::ops::{Deref, DerefMut};
 
 use crate::system::*;
-use crate::world::{BorrowResult, World};
+use crate::world::World;
 
 pub struct Unique<'a, T: Any> {
     storage: Ref<'a, T>,
@@ -61,7 +62,7 @@ impl<'a, T: Any> SystemParam<'a> for Unique<'a, T> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.unique_ref()?,
+            storage: world.all_storages().unique_ref()?,
         })
     }
 }
@@ -70,7 +71,7 @@ impl<'a, T: Any> SystemParam<'a> for UniqueMut<'a, T> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.unique_mut()?,
+            storage: world.all_storages().unique_mut()?,
         })
     }
 }

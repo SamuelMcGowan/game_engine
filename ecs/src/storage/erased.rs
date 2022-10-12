@@ -3,7 +3,7 @@ use std::cell::{Ref, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use crate::world::*;
+use crate::storage::all_storages::{BorrowError, BorrowResult};
 
 #[derive(Debug)]
 pub struct StorageOccupied;
