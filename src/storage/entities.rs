@@ -62,7 +62,12 @@ impl EntityStorage {
 
             let entity = self.next;
             self.next += 1;
-            EntityId { entity, version: 0 }
+
+            let entity = EntityId { entity, version: 0 };
+
+            self.storage.insert(entity.entity as usize, entity);
+
+            entity
         }
     }
 
