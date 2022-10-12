@@ -3,18 +3,19 @@ use std::cell::{Ref, RefMut};
 use crate::storage::components::*;
 use crate::storage::entities::{EntityId, EntityStorage};
 use crate::system::*;
+use crate::world::{BorrowResult, World};
 
-pub struct Query<'a, C: Component> {
+pub struct Comp<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,
     entities: &'a EntityStorage,
 }
 
-pub struct QueryMut<'a, C: Component> {
+pub struct CompMut<'a, C: Component> {
     storage: RefMut<'a, ComponentStorage<C>>,
     entities: &'a EntityStorage,
 }
 
-impl<'a, C: Component> Query<'a, C> {
+impl<'a, C: Component> Comp<'a, C> {
     #[inline]
     pub fn get(&self, entity: EntityId) -> Option<&C> {
         self.storage.get(self.entities.entity_to_alive(entity))
@@ -31,7 +32,7 @@ impl<'a, C: Component> Query<'a, C> {
     }
 }
 
-impl<'a, C: Component> QueryMut<'a, C> {
+impl<'a, C: Component> CompMut<'a, C> {
     #[inline]
     pub fn get(&self, entity: EntityId) -> Option<&C> {
         self.storage.get(self.entities.entity_to_alive(entity))
@@ -69,7 +70,7 @@ impl<'a, C: Component> QueryMut<'a, C> {
     }
 }
 
-impl<'a, C: Component> SystemParam<'a> for Query<'a, C> {
+impl<'a, C: Component> SystemParam<'a> for Comp<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
@@ -79,7 +80,7 @@ impl<'a, C: Component> SystemParam<'a> for Query<'a, C> {
     }
 }
 
-impl<'a, C: Component> SystemParam<'a> for QueryMut<'a, C> {
+impl<'a, C: Component> SystemParam<'a> for CompMut<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {

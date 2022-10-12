@@ -14,8 +14,8 @@ fn adding_components() {
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
 
-    assert_eq!(world.get::<Query<Foo>>().get(a), Some(&Foo(10)));
-    assert_eq!(world.get::<Query<Foo>>().get(b), Some(&Foo(20)));
+    assert_eq!(world.get::<Comp<Foo>>().get(a), Some(&Foo(10)));
+    assert_eq!(world.get::<Comp<Foo>>().get(b), Some(&Foo(20)));
 }
 
 #[test]
@@ -26,11 +26,11 @@ fn remove_a() {
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
 
-    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
+    let a_foo = world.get::<CompMut<Foo>>().remove(a);
     assert_eq!(a_foo, Some(Foo(10)));
 
-    assert!(world.get::<Query<Foo>>().get(a).is_none());
-    assert_eq!(world.get::<Query<Foo>>().get(b), Some(&Foo(20)));
+    assert!(world.get::<Comp<Foo>>().get(a).is_none());
+    assert_eq!(world.get::<Comp<Foo>>().get(b), Some(&Foo(20)));
 }
 
 #[test]
@@ -41,11 +41,11 @@ fn remove_b() {
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
 
-    let b_foo = world.get::<QueryMut<Foo>>().remove(b);
+    let b_foo = world.get::<CompMut<Foo>>().remove(b);
     assert_eq!(b_foo, Some(Foo(20)));
 
-    assert_eq!(world.get::<Query<Foo>>().get(a), Some(&Foo(10)));
-    assert!(world.get::<Query<Foo>>().get(b).is_none());
+    assert_eq!(world.get::<Comp<Foo>>().get(a), Some(&Foo(10)));
+    assert!(world.get::<Comp<Foo>>().get(b).is_none());
 }
 
 #[test]
@@ -56,14 +56,14 @@ fn remove_both() {
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
 
-    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
-    let b_foo = world.get::<QueryMut<Foo>>().remove(b);
+    let a_foo = world.get::<CompMut<Foo>>().remove(a);
+    let b_foo = world.get::<CompMut<Foo>>().remove(b);
 
     assert_eq!(a_foo, Some(Foo(10)));
     assert_eq!(b_foo, Some(Foo(20)));
 
-    assert!(world.get::<Query<Foo>>().get(a).is_none());
-    assert!(world.get::<Query<Foo>>().get(b).is_none());
+    assert!(world.get::<Comp<Foo>>().get(a).is_none());
+    assert!(world.get::<Comp<Foo>>().get(b).is_none());
 }
 
 #[test]
@@ -73,8 +73,8 @@ fn remove_twice() {
 
     let a = world.spawn().insert(Foo(10)).id();
 
-    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
-    let a_foo_again = world.get::<QueryMut<Foo>>().remove(a);
+    let a_foo = world.get::<CompMut<Foo>>().remove(a);
+    let a_foo_again = world.get::<CompMut<Foo>>().remove(a);
 
     assert_eq!(a_foo, Some(Foo(10)));
     assert_eq!(a_foo_again, None);
@@ -86,14 +86,14 @@ fn add_again() {
     world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
-    let a_foo = world.get::<QueryMut<Foo>>().remove(a);
+    let a_foo = world.get::<CompMut<Foo>>().remove(a);
 
     assert_eq!(a_foo, Some(Foo(10)));
-    assert!(world.get::<Query<Foo>>().get(a).is_none());
+    assert!(world.get::<Comp<Foo>>().get(a).is_none());
 
     world.entity(a).insert(Foo(20));
 
-    assert_eq!(world.get::<Query<Foo>>().get(a), Some(&Foo(20)));
+    assert_eq!(world.get::<Comp<Foo>>().get(a), Some(&Foo(20)));
 }
 
 #[test]
@@ -126,7 +126,7 @@ fn iter() {
     let b = world.spawn().insert(Foo(20)).id();
 
     world
-        .run(|query: Query<Foo>| {
+        .run(|query: Comp<Foo>| {
             let sum: usize = query.iter().map(|foo| foo.0).sum();
             assert_eq!(sum, 30);
 
@@ -145,7 +145,7 @@ fn system_mut() {
     let b = world.spawn().insert(Foo(20)).id();
 
     world
-        .run(|mut query: QueryMut<Foo>| {
+        .run(|mut query: CompMut<Foo>| {
             *query.get_mut(a).unwrap() = Foo(30);
 
             assert_eq!(query.get(a), Some(&Foo(30)));
@@ -174,7 +174,7 @@ fn system_borrow_conflict() {
     world.spawn().insert(Foo(20));
 
     world
-        .run(|_q1: QueryMut<Foo>, _q2: QueryMut<Foo>| {})
+        .run(|_q1: CompMut<Foo>, _q2: CompMut<Foo>| {})
         .unwrap();
 }
 

@@ -3,6 +3,7 @@ use std::cell::{Ref, RefMut};
 use std::ops::{Deref, DerefMut};
 
 use crate::system::*;
+use crate::world::{BorrowResult, World};
 
 pub struct Unique<'a, T: Any> {
     storage: Ref<'a, T>,
