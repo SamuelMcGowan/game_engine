@@ -1,4 +1,5 @@
 mod components;
+mod entities;
 mod erased;
 mod sparse_set;
 
