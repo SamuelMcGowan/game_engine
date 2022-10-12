@@ -1,6 +1,7 @@
+use crate::world::EntityId;
+
 use super::sparse_set::SparseSet;
 pub use super::sparse_set::{Iter, IterMut};
-use crate::world::EntityId;
 
 pub trait Component: 'static {}
 

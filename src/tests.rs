@@ -1,4 +1,4 @@
-use crate::storage::Component;
+use crate::storage::components::Component;
 use crate::system::{Query, QueryMut, SystemError, Unique, UniqueMut};
 use crate::world::World;
 

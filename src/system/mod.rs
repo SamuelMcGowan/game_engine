@@ -1,8 +1,7 @@
 mod unique;
 mod query;
 
-use super::storage::{BorrowError, BorrowResult};
-use super::world::World;
+use super::world::*;
 
 pub use query::*;
 pub use unique::*;

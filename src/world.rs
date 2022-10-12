@@ -1,15 +1,28 @@
-use std::ops::{Deref, DerefMut};
+use std::any::Any;
+use std::cell::{Ref, RefMut};
 
-use super::storage::{AllStorages, Component};
-use super::system::{System, SystemOutput, SystemResult};
+use crate::system::{System, SystemResult, SystemOutput};
+
+pub use crate::storage::components::*;
+use crate::storage::erased::{ErasedStorage, StorageOccupied};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BorrowError {
+    InvalidBorrow,
+    StorageNotFound,
+    ValueNotFound,
+}
+
+pub type BorrowResult<T> = Result<T, BorrowError>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct EntityId(pub(super) usize);
+pub struct EntityId(pub(crate) usize);
 
 #[derive(Default)]
 pub struct World {
     entity_count: usize,
-    all_storages: AllStorages,
+    components: ErasedStorage,
+    unique: ErasedStorage,
 }
 
 impl World {
@@ -34,27 +47,47 @@ impl World {
         }
     }
 
+    pub fn register_components<C: Component>(&mut self) -> Result<(), StorageOccupied> {
+        self.components.insert(ComponentStorage::<C>::default())
+    }
+
+    pub fn component_storage_ref<C: Component>(&self) -> BorrowResult<Ref<ComponentStorage<C>>> {
+        self.components.borrow_ref()
+    }
+
+    pub fn component_storage_mut<C: Component>(&self) -> BorrowResult<RefMut<ComponentStorage<C>>> {
+        self.components.borrow_mut()
+    }
+
+    pub fn component_ref<C: Component>(&self, entity: EntityId) -> BorrowResult<Ref<C>> {
+        let storage = self.component_storage_ref::<C>()?;
+        Ref::filter_map(storage, |storage| storage.get(entity))
+            .map_err(|_| BorrowError::ValueNotFound)
+    }
+
+    pub fn component_mut<C: Component>(&self, entity: EntityId) -> BorrowResult<RefMut<C>> {
+        let storage = self.component_storage_mut::<C>()?;
+        RefMut::filter_map(storage, |storage| storage.get_mut(entity))
+            .map_err(|_| BorrowError::ValueNotFound)
+    }
+
+    pub fn insert_unique<T: Any>(&mut self, unique: T) -> Result<(), StorageOccupied> {
+        self.unique.insert(unique)
+    }
+
+    pub fn unique_ref<T: Any>(&self) -> BorrowResult<Ref<T>> {
+        self.unique.borrow_ref()
+    }
+
+    pub fn unique_mut<T: Any>(&self) -> BorrowResult<RefMut<T>> {
+        self.unique.borrow_mut()
+    }
+
     pub fn run<'a, S: System<'a, Params, Output>, Params, Output: SystemOutput>(
         &'a mut self,
         mut system: S,
     ) -> SystemResult<Output::Success, Output::Error> {
         system.run(self)
-    }
-}
-
-impl Deref for World {
-    type Target = AllStorages;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        &self.all_storages
-    }
-}
-
-impl DerefMut for World {
-    #[inline]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.all_storages
     }
 }
 

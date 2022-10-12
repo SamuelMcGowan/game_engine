@@ -2,8 +2,7 @@ use std::any::Any;
 use std::cell::{Ref, RefMut};
 use std::ops::{Deref, DerefMut};
 
-use crate::storage::BorrowResult;
-use crate::world::World;
+use crate::world::*;
 
 use super::SystemParam;
 
