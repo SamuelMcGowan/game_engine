@@ -15,6 +15,7 @@ pub enum BorrowError {
 
 pub type BorrowResult<T> = Result<T, BorrowError>;
 
+/// Central container for ECS data.
 #[derive(Default)]
 pub struct World {
     entities: EntityStorage,
@@ -43,16 +44,21 @@ impl World {
         }
     }
 
+    /// Get a query.
+    /// 
+    /// Panics upon failure.
     pub fn get<'a, P: SystemParam<'a>>(&'a self) -> P {
         P::borrow(self).unwrap_or_else(|err| {
             panic!("borrow error: {err:?}");
         })
     }
 
+    /// Try to get a query.
     pub fn try_get<'a, P: SystemParam<'a>>(&'a self) -> BorrowResult<P> {
         P::borrow(self)
     }
 
+    /// Register component type.
     pub fn register_components<C: Component>(&mut self) -> Result<(), StorageOccupied> {
         self.components.insert(ComponentStorage::<C>::default())
     }
@@ -73,6 +79,7 @@ impl World {
         &self.entities
     }
 
+    /// Insert a unique value.
     pub fn insert_unique<T: Any>(&mut self, unique: T) -> Result<(), StorageOccupied> {
         self.unique.insert(unique)
     }
@@ -85,6 +92,7 @@ impl World {
         self.unique.borrow_mut()
     }
 
+    /// Run a system.
     pub fn run<'a, S: System<'a, Params, Output>, Params, Output: SystemOutput>(
         &'a mut self,
         mut system: S,
