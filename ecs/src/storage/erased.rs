@@ -3,22 +3,9 @@ use std::cell::{Ref, RefCell, RefMut};
 use std::collections::hash_map::{Entry, Values, ValuesMut};
 use std::collections::HashMap;
 
-use crate::storage::entities::LiveEntity;
+use super::{BorrowError, BorrowResult, Storage};
 
 // THANKS TO: https://lucumr.pocoo.org/2022/1/7/as-any-hack/
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum BorrowError {
-    ResourceNotFound,
-    StorageNotFound,
-    InvalidBorrow,
-}
-
-pub type BorrowResult<T> = Result<T, BorrowError>;
-
-pub trait Storage: 'static {
-    fn remove_entity(&mut self, entity: LiveEntity);
-}
 
 trait AnyStorage: Storage + Any {
     fn as_any(&self) -> &dyn Any;
@@ -71,7 +58,7 @@ impl ErasedStorage {
 }
 
 #[derive(Default)]
-pub struct ErasedStorages {
+pub(crate) struct ErasedStorages {
     storages: HashMap<TypeId, RefCell<ErasedStorage>>,
 }
 
@@ -135,7 +122,7 @@ impl ErasedStorages {
     }
 }
 
-pub struct ErasedStorageIter<'a>(Values<'a, TypeId, RefCell<ErasedStorage>>);
+pub(crate) struct ErasedStorageIter<'a>(Values<'a, TypeId, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIter<'a> {
     type Item = BorrowResult<Ref<'a, dyn Storage>>;
@@ -153,7 +140,7 @@ impl<'a> Iterator for ErasedStorageIter<'a> {
     }
 }
 
-pub struct ErasedStorageIterMut<'a>(ValuesMut<'a, TypeId, RefCell<ErasedStorage>>);
+pub(crate) struct ErasedStorageIterMut<'a>(ValuesMut<'a, TypeId, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIterMut<'a> {
     type Item = BorrowResult<RefMut<'a, dyn Storage>>;

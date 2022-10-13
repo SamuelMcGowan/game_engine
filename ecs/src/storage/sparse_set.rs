@@ -7,7 +7,7 @@ struct DenseEntry<T> {
 }
 
 #[derive(Debug)]
-pub struct SparseSet<T> {
+pub(crate) struct SparseSet<T> {
     sparse: SparseArray,
     dense: Vec<DenseEntry<T>>,
 }

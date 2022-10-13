@@ -1,10 +1,6 @@
 use std::cell::{Ref, RefMut};
 
-use crate::storage::components::*;
-use crate::storage::entities::{EntityId, EntityStorage};
-use crate::storage::erased::BorrowResult;
-use crate::system::*;
-use crate::world::World;
+use crate::prelude::*;
 
 pub struct Comp<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,

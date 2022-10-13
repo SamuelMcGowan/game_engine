@@ -1,8 +1,6 @@
-use crate::storage::entities::LiveEntity;
-use crate::storage::erased::Storage;
-use crate::storage::sparse_set::SparseSet;
-
-pub use crate::storage::sparse_set::{Iter, IterMut};
+use super::sparse_set::SparseSet;
+use super::Storage;
+use crate::prelude::*;
 
 pub trait Component: 'static {}
 

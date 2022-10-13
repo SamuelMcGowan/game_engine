@@ -1,5 +1,4 @@
-use crate::storage::erased::{BorrowError, BorrowResult};
-use crate::world::World;
+use crate::prelude::*;
 
 pub trait System<'a, Params, Output: SystemOutput> {
     fn run(&mut self, world: &'a World) -> SystemResult<Output::Success, Output::Error>;

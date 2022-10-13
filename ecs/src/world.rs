@@ -1,10 +1,7 @@
 use std::any::Any;
 
-use crate::storage::all_storages::{AllStorages, EntityMut};
-use crate::storage::components::*;
-use crate::storage::entities::EntityId;
-use crate::storage::erased::BorrowResult;
-use crate::system::*;
+use crate::prelude::*;
+use crate::storage::all_storages::AllStorages;
 
 /// Central container for ECS data.
 #[derive(Default)]
@@ -13,6 +10,11 @@ pub struct World {
 }
 
 impl World {
+    #[inline]
+    pub(crate) fn all_storages(&self) -> &AllStorages {
+        &self.all_storages
+    }
+
     /// Spawn a new entity and create a handle for it.
     #[inline]
     pub fn spawn(&mut self) -> EntityMut {
@@ -28,10 +30,6 @@ impl World {
     #[inline]
     pub fn insert_unique<T: Any>(&mut self, unique: T) -> Option<()> {
         self.all_storages.insert_unique(unique)
-    }
-
-    pub(crate) fn all_storages(&self) -> &AllStorages {
-        &self.all_storages
     }
 
     /// Get a query.

@@ -1,6 +1,6 @@
-use crate::storage::sparse_set::SparseSet;
-
 // THANKS TO: https://skypjack.github.io/2019-05-06-ecs-baf-part-3/
+
+use super::sparse_set::SparseSet;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(packed)]
@@ -28,7 +28,7 @@ impl std::fmt::Debug for EntityId {
 }
 
 #[derive(Default)]
-pub struct EntityStorage {
+pub(crate) struct EntityStorage {
     next_recycled: u32,
     num_recycled: usize,
 
@@ -132,7 +132,8 @@ impl EntityStorage {
 }
 
 /// An alive entity.
-pub struct LiveEntity<'a> {
+#[doc(hidden)]
+pub(crate) struct LiveEntity<'a> {
     entity: EntityId,
     _storage: &'a EntityStorage,
 }

@@ -1,8 +1,25 @@
 pub mod components;
 pub mod entities;
-pub mod unique;
 
 pub(crate) mod all_storages;
-pub(crate) mod erased;
+pub(crate) mod unique;
 
+mod erased;
 mod sparse_set;
+
+pub use self::all_storages::EntityMut;
+use self::entities::LiveEntity;
+pub use self::sparse_set::{Iter, IterMut};
+
+pub(crate) trait Storage: 'static {
+    fn remove_entity(&mut self, entity: LiveEntity);
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BorrowError {
+    ResourceNotFound,
+    StorageNotFound,
+    InvalidBorrow,
+}
+
+pub type BorrowResult<T> = Result<T, BorrowError>;
