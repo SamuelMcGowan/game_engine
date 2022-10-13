@@ -5,18 +5,18 @@ use crate::storage::sparse_set::SparseSet;
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(packed)]
 pub struct EntityId {
-    entity: u16,
-    version: u16,
+    entity: u32,
+    version: u32,
 }
 
 // This is to avoid references to EntityId
 // fields (because it's a packed struct).
 impl EntityId {
-    pub fn entity(self) -> u16 {
+    pub fn entity(self) -> u32 {
         self.entity
     }
 
-    pub fn version(self) -> u16 {
+    pub fn version(self) -> u32 {
         self.version
     }
 }
@@ -29,10 +29,10 @@ impl std::fmt::Debug for EntityId {
 
 #[derive(Default)]
 pub struct EntityStorage {
-    next_recycled: u16,
+    next_recycled: u32,
     num_recycled: usize,
 
-    next: u16,
+    next: u32,
 
     storage: SparseSet<EntityId>,
 }
@@ -56,7 +56,7 @@ impl EntityStorage {
             // There are no entities we can reuse, so we need to
             // assign a new one.
 
-            if self.next == u16::MAX {
+            if self.next == u32::MAX {
                 panic!("out of entities.");
             }
 
@@ -84,13 +84,13 @@ impl EntityStorage {
         }
 
         // Increment the version.
-        // Version will not be greater than `u16::MAX` - 1, so it won't wrap.
+        // Version will not be greater than `u32::MAX` - 1, so it won't wrap.
         stored.version += 1;
 
         // Recycle this id if possible by adding it to the implicit linked list.
-        // It can't be reused if its new version is `u16::MAX`, because its
+        // It can't be reused if its new version is `u32::MAX`, because its
         // version wouldn't be incrementable when it was despawned.
-        if stored.version < u16::MAX {
+        if stored.version < u32::MAX {
             std::mem::swap(&mut self.next_recycled, &mut stored.entity());
             self.num_recycled += 1;
         }
