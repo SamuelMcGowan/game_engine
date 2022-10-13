@@ -1,4 +1,4 @@
-use crate::storage::all_storages::{BorrowError, BorrowResult};
+use crate::storage::erased::{BorrowError, BorrowResult};
 use crate::world::World;
 
 pub trait System<'a, Params, Output: SystemOutput> {

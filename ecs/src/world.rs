@@ -1,9 +1,9 @@
 use std::any::Any;
 
-use crate::storage::all_storages::{AllStorages, BorrowResult, EntityMut};
+use crate::storage::all_storages::{AllStorages, EntityMut};
 use crate::storage::components::*;
 use crate::storage::entities::EntityId;
-use crate::storage::erased::StorageOccupied;
+use crate::storage::erased::BorrowResult;
 use crate::system::*;
 
 /// Central container for ECS data.
@@ -26,7 +26,7 @@ impl World {
     }
 
     #[inline]
-    pub fn insert_unique<T: Any>(&mut self, unique: T) -> Result<(), StorageOccupied> {
+    pub fn insert_unique<T: Any>(&mut self, unique: T) -> Option<()> {
         self.all_storages.insert_unique(unique)
     }
 
@@ -50,7 +50,7 @@ impl World {
     }
 
     /// Register component type.
-    pub fn register_components<C: Component>(&mut self) -> Result<(), StorageOccupied> {
+    pub fn register_components<C: Component>(&mut self) -> Option<()> {
         self.all_storages.register_components::<C>()
     }
 

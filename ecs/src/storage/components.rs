@@ -1,4 +1,5 @@
 use crate::storage::entities::LiveEntity;
+use crate::storage::erased::Storage;
 use crate::storage::sparse_set::SparseSet;
 
 pub use crate::storage::sparse_set::{Iter, IterMut};
@@ -47,5 +48,11 @@ impl<C: Component> ComponentStorage<C> {
     #[inline]
     pub fn contains(&self, entity: LiveEntity) -> bool {
         self.0.contains(entity.index())
+    }
+}
+
+impl<C: Component> Storage for ComponentStorage<C> {
+    fn remove_entity(&mut self, entity: LiveEntity) {
+        self.remove(entity);
     }
 }

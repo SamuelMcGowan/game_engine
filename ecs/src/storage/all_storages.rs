@@ -4,14 +4,16 @@ use std::cell::{Ref, RefMut};
 use crate::storage::components::{Component, ComponentStorage};
 use crate::storage::entities::LiveEntity;
 use crate::storage::entities::{EntityId, EntityStorage};
-use crate::storage::erased::ErasedStorage;
-use crate::storage::erased::StorageOccupied;
+use crate::storage::erased::ErasedStorages;
+
+use super::erased::{BorrowResult, Storage};
+use super::unique::UniqueStorage;
 
 #[derive(Default)]
 pub(crate) struct AllStorages {
     entities: EntityStorage,
-    components: ErasedStorage,
-    unique: ErasedStorage,
+    components: ErasedStorages,
+    unique: ErasedStorages,
 }
 
 impl AllStorages {
@@ -38,7 +40,7 @@ impl AllStorages {
     }
 
     #[inline]
-    pub fn register_components<C: Component>(&mut self) -> Result<(), StorageOccupied> {
+    pub fn register_components<C: Component>(&mut self) -> Option<()> {
         self.components.insert(ComponentStorage::<C>::default())
     }
 
@@ -53,17 +55,17 @@ impl AllStorages {
     }
 
     #[inline]
-    pub fn insert_unique<T: Any>(&mut self, unique: T) -> Result<(), StorageOccupied> {
-        self.unique.insert(unique)
+    pub fn insert_unique<T: Any>(&mut self, unique: T) -> Option<()> {
+        self.unique.insert(UniqueStorage(unique))
     }
 
     #[inline]
-    pub fn unique_ref<T: Any>(&self) -> BorrowResult<Ref<T>> {
+    pub fn unique_ref<T: Any + Storage>(&self) -> BorrowResult<Ref<T>> {
         self.unique.borrow_ref()
     }
 
     #[inline]
-    pub fn unique_mut<T: Any>(&self) -> BorrowResult<RefMut<T>> {
+    pub fn unique_mut<T: Any + Storage>(&self) -> BorrowResult<RefMut<T>> {
         self.unique.borrow_mut()
     }
 
@@ -117,12 +119,3 @@ impl EntityMut<'_> {
         self.all_storages.entities.entity_to_alive(self.entity)
     }
 }
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum BorrowError {
-    InvalidBorrow,
-    StorageNotFound,
-    ValueNotFound,
-}
-
-pub type BorrowResult<T> = Result<T, BorrowError>;

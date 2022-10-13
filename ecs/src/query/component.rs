@@ -1,8 +1,8 @@
 use std::cell::{Ref, RefMut};
 
-use crate::storage::all_storages::BorrowResult;
 use crate::storage::components::*;
 use crate::storage::entities::{EntityId, EntityStorage};
+use crate::storage::erased::BorrowResult;
 use crate::system::*;
 use crate::world::World;
 
