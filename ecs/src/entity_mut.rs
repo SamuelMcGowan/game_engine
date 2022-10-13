@@ -17,12 +17,19 @@ impl<'a> EntityMut<'a> {
         }
     }
 
+    /// Despawn an entity.
+    ///
+    /// Panics if the entity is dear or any storage is borrowed.
+    pub fn despawn(self) {
+        self.all_storages.despawn_entity(self.entity);
+    }
+
     /// Add a component to the entity.
     ///
     /// Panics if the component type is not registered.
     pub fn insert<C: Component>(&mut self, component: C) -> &mut Self {
         let mut components = self.components_mut::<C>();
-        components.insert(self.live(), component);
+        components.insert(&self.live(), component);
         drop(components);
         self
     }
@@ -32,7 +39,7 @@ impl<'a> EntityMut<'a> {
     /// Panics if the component type is not registered.
     pub fn remove<C: Component>(&mut self) -> &mut Self {
         let mut components = self.components_mut::<C>();
-        components.remove(self.live());
+        components.remove(&self.live());
         drop(components);
         self
     }
@@ -51,6 +58,8 @@ impl<'a> EntityMut<'a> {
     }
 
     fn live(&self) -> LiveEntity {
-        self.all_storages.entity_storage().entity_to_alive(self.entity)
+        self.all_storages
+            .entity_storage()
+            .entity_to_alive(self.entity)
     }
 }

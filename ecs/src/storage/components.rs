@@ -14,22 +14,22 @@ impl<C: Component> Default for ComponentStorage<C> {
 
 impl<C: Component> ComponentStorage<C> {
     #[inline]
-    pub fn get(&self, entity: LiveEntity) -> Option<&C> {
+    pub fn get(&self, entity: &LiveEntity) -> Option<&C> {
         self.0.get(entity.index())
     }
 
     #[inline]
-    pub fn get_mut(&mut self, entity: LiveEntity) -> Option<&mut C> {
+    pub fn get_mut(&mut self, entity: &LiveEntity) -> Option<&mut C> {
         self.0.get_mut(entity.index())
     }
 
     #[inline]
-    pub fn insert(&mut self, entity: LiveEntity, element: C) -> Option<C> {
+    pub fn insert(&mut self, entity: &LiveEntity, element: C) -> Option<C> {
         self.0.insert(entity.index(), element)
     }
 
     #[inline]
-    pub fn remove(&mut self, entity: LiveEntity) -> Option<C> {
+    pub fn remove(&mut self, entity: &LiveEntity) -> Option<C> {
         self.0.remove(entity.index())
     }
 
@@ -50,7 +50,7 @@ impl<C: Component> ComponentStorage<C> {
 }
 
 impl<C: Component> Storage for ComponentStorage<C> {
-    fn remove_entity(&mut self, entity: LiveEntity) {
+    fn remove_entity(&mut self, entity: &LiveEntity) {
         self.remove(entity);
     }
 }

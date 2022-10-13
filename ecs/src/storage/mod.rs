@@ -11,7 +11,7 @@ use self::entities::LiveEntity;
 pub use self::sparse_set::{Iter, IterMut};
 
 pub(crate) trait Storage: 'static {
-    fn remove_entity(&mut self, entity: LiveEntity);
+    fn remove_entity(&mut self, entity: &LiveEntity);
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

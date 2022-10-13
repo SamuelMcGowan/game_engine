@@ -15,7 +15,7 @@ pub struct CompMut<'a, C: Component> {
 impl<'a, C: Component> Comp<'a, C> {
     #[inline]
     pub fn get(&self, entity: EntityId) -> Option<&C> {
-        self.storage.get(self.entities.entity_to_alive(entity))
+        self.storage.get(&self.entities.entity_to_alive(entity))
     }
 
     #[inline]
@@ -32,23 +32,23 @@ impl<'a, C: Component> Comp<'a, C> {
 impl<'a, C: Component> CompMut<'a, C> {
     #[inline]
     pub fn get(&self, entity: EntityId) -> Option<&C> {
-        self.storage.get(self.entities.entity_to_alive(entity))
+        self.storage.get(&self.entities.entity_to_alive(entity))
     }
 
     #[inline]
     pub fn get_mut(&mut self, entity: EntityId) -> Option<&mut C> {
-        self.storage.get_mut(self.entities.entity_to_alive(entity))
+        self.storage.get_mut(&self.entities.entity_to_alive(entity))
     }
 
     #[inline]
     pub fn insert(&mut self, entity: EntityId, element: C) -> Option<C> {
         self.storage
-            .insert(self.entities.entity_to_alive(entity), element)
+            .insert(&self.entities.entity_to_alive(entity), element)
     }
 
     #[inline]
     pub fn remove(&mut self, entity: EntityId) -> Option<C> {
-        self.storage.remove(self.entities.entity_to_alive(entity))
+        self.storage.remove(&self.entities.entity_to_alive(entity))
     }
 
     #[inline]

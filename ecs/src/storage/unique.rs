@@ -6,5 +6,5 @@ use super::Storage;
 pub(crate) struct UniqueStorage<T: Any>(pub T);
 
 impl<T: Any> Storage for UniqueStorage<T> {
-    fn remove_entity(&mut self, _entity: LiveEntity) {}
+    fn remove_entity(&mut self, _entity: &LiveEntity) {}
 }
