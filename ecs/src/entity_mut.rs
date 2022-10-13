@@ -27,7 +27,7 @@ impl<'a> EntityMut<'a> {
     /// Add a component to the entity.
     ///
     /// Panics if the component type is not registered.
-    pub fn insert<C: Component>(&mut self, component: C) -> &mut Self {
+    pub fn insert<C: Component>(self, component: C) -> Self {
         let mut components = self.components_mut::<C>();
         components.insert(&self.live(), component);
         drop(components);
@@ -37,7 +37,7 @@ impl<'a> EntityMut<'a> {
     /// Remove a component from an entity.
     ///
     /// Panics if the component type is not registered.
-    pub fn remove<C: Component>(&mut self) -> &mut Self {
+    pub fn remove<C: Component>(self) -> Self {
         let mut components = self.components_mut::<C>();
         components.remove(&self.live());
         drop(components);

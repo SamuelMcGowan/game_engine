@@ -184,3 +184,29 @@ fn storage_missing() {
     let mut world = World::default();
     world.spawn().insert(Foo(10));
 }
+
+#[test]
+#[should_panic]
+fn remove_entity() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    let entity = world.spawn().insert(Foo(10));
+    let a = entity.id();
+
+    entity.despawn();
+    world.entity(a);
+}
+
+#[test]
+#[should_panic]
+fn remove_entity_components() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    let entity = world.spawn().insert(Foo(10));
+    let a = entity.id();
+
+    entity.despawn();
+    world.get::<Comp<Foo>>().get(a);
+}
