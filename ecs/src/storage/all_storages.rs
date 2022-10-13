@@ -8,7 +8,7 @@ use crate::prelude::*;
 
 #[derive(Default)]
 pub(crate) struct AllStorages {
-    pub(crate) entities: EntityStorage,
+    entities: EntityStorage,
     components: ErasedStorages,
     unique: ErasedStorages,
 }
