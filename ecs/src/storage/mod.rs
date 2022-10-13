@@ -7,7 +7,6 @@ pub(crate) mod unique;
 mod erased;
 mod sparse_set;
 
-pub use self::all_storages::EntityMut;
 use self::entities::LiveEntity;
 pub use self::sparse_set::{Iter, IterMut};
 
