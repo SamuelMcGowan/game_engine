@@ -210,3 +210,18 @@ fn remove_entity_components() {
     entity.despawn();
     world.get::<Comp<Foo>>().get(a);
 }
+
+#[test]
+fn replace_entity() {
+    let mut world = World::default();
+    world.register_components::<Foo>().unwrap();
+
+    let entity = world.spawn().insert(Foo(10));
+    let a = entity.id();
+
+    entity.despawn();
+    
+    let b = world.spawn().id();
+    assert_eq!(a.entity(), b.entity());
+    assert!(world.get::<Comp<Foo>>().get(b).is_none());
+}
