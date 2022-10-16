@@ -4,6 +4,7 @@ pub mod entities;
 pub(crate) mod all_storages;
 pub(crate) mod unique;
 
+mod  erased_new;
 mod erased;
 mod sparse_set;
 
