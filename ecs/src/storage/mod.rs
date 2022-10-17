@@ -4,8 +4,8 @@ pub mod entities;
 pub(crate) mod all_storages;
 pub(crate) mod unique;
 
-mod  erased_new;
 mod erased;
+mod erased_new;
 mod sparse_set;
 
 use self::entities::LiveEntity;

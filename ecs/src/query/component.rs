@@ -71,8 +71,8 @@ impl<'a, C: Component> Query<'a> for Comp<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages().component_storage_ref()?,
-            entities: world.all_storages().entity_storage(),
+            storage: world.all_storages.components.borrow_ref()?,
+            entities: world.all_storages.entity_storage(),
         })
     }
 }
@@ -81,8 +81,8 @@ impl<'a, C: Component> Query<'a> for CompMut<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages().component_storage_mut()?,
-            entities: world.all_storages().entity_storage(),
+            storage: world.all_storages.components.borrow_mut()?,
+            entities: world.all_storages.entity_storage(),
         })
     }
 }

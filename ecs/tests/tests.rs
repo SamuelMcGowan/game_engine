@@ -220,7 +220,7 @@ fn replace_entity() {
     let a = entity.id();
 
     entity.despawn();
-    
+
     let b = world.spawn().id();
     assert_eq!(a.entity(), b.entity());
     assert!(world.get::<Comp<Foo>>().get(b).is_none());

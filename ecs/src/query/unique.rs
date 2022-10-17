@@ -61,7 +61,7 @@ impl<'a, T: Any> Query<'a> for Unique<'a, T> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages().unique_ref()?,
+            storage: world.all_storages.uniques.borrow_ref()?,
         })
     }
 }
@@ -70,7 +70,7 @@ impl<'a, T: Any> Query<'a> for UniqueMut<'a, T> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages().unique_mut()?,
+            storage: world.all_storages.uniques.borrow_mut()?,
         })
     }
 }

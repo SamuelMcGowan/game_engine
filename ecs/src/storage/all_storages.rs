@@ -1,16 +1,65 @@
 use std::any::Any;
 use std::cell::{Ref, RefMut};
 
-use super::erased::ErasedStorages;
+use super::erased::{ErasedStorageIter, ErasedStorageIterMut, ErasedStorages};
 use super::unique::UniqueStorage;
-use super::Storage;
 use crate::prelude::*;
+
+#[derive(Default)]
+pub(crate) struct AllComponentStorages(ErasedStorages);
+
+impl AllComponentStorages {
+    #[inline]
+    pub fn insert_storage<C: Component>(&mut self) -> Option<()> {
+        self.0.insert(ComponentStorage::<C>::default())
+    }
+
+    #[inline]
+    pub fn borrow_ref<C: Component>(&self) -> BorrowResult<Ref<ComponentStorage<C>>> {
+        self.0.borrow_ref()
+    }
+
+    #[inline]
+    pub fn borrow_mut<C: Component>(&self) -> BorrowResult<RefMut<ComponentStorage<C>>> {
+        self.0.borrow_mut()
+    }
+
+    #[inline]
+    pub fn iter_refs(&self) -> ErasedStorageIter {
+        self.0.iter_refs()
+    }
+
+    #[inline]
+    pub fn iter_muts(&mut self) -> ErasedStorageIterMut {
+        self.0.iter_muts()
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct AllUniqueStorages(ErasedStorages);
+
+impl AllUniqueStorages {
+    #[inline]
+    pub fn insert<T: Any>(&mut self, unique: T) -> Option<()> {
+        self.0.insert(UniqueStorage(unique))
+    }
+
+    #[inline]
+    pub fn borrow_ref<T: Any>(&self) -> BorrowResult<Ref<UniqueStorage<T>>> {
+        self.0.borrow_ref()
+    }
+
+    #[inline]
+    pub fn borrow_mut<T: Any>(&self) -> BorrowResult<RefMut<UniqueStorage<T>>> {
+        self.0.borrow_mut()
+    }
+}
 
 #[derive(Default)]
 pub(crate) struct AllStorages {
     entities: EntityStorage,
-    components: ErasedStorages,
-    unique: ErasedStorages,
+    pub(crate) components: AllComponentStorages,
+    pub(crate) uniques: AllUniqueStorages,
 }
 
 impl AllStorages {
@@ -41,36 +90,6 @@ impl AllStorages {
         }
 
         EntityMut::new(entity, self)
-    }
-
-    #[inline]
-    pub fn register_components<C: Component>(&mut self) -> Option<()> {
-        self.components.insert(ComponentStorage::<C>::default())
-    }
-
-    #[inline]
-    pub fn component_storage_ref<C: Component>(&self) -> BorrowResult<Ref<ComponentStorage<C>>> {
-        self.components.borrow_ref()
-    }
-
-    #[inline]
-    pub fn component_storage_mut<C: Component>(&self) -> BorrowResult<RefMut<ComponentStorage<C>>> {
-        self.components.borrow_mut()
-    }
-
-    #[inline]
-    pub fn insert_unique<T: Any>(&mut self, unique: T) -> Option<()> {
-        self.unique.insert(UniqueStorage(unique))
-    }
-
-    #[inline]
-    pub fn unique_ref<T: Any + Storage>(&self) -> BorrowResult<Ref<T>> {
-        self.unique.borrow_ref()
-    }
-
-    #[inline]
-    pub fn unique_mut<T: Any + Storage>(&self) -> BorrowResult<RefMut<T>> {
-        self.unique.borrow_mut()
     }
 
     #[inline]

@@ -53,7 +53,8 @@ impl<'a> EntityMut<'a> {
     /// Panics if the component type is not registered.
     fn components_mut<C: Component>(&self) -> RefMut<ComponentStorage<C>> {
         self.all_storages
-            .component_storage_mut::<C>()
+            .components
+            .borrow_mut::<C>()
             .expect("component type not registered")
     }
 

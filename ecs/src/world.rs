@@ -6,15 +6,10 @@ use crate::storage::all_storages::AllStorages;
 /// Central container for ECS data.
 #[derive(Default)]
 pub struct World {
-    all_storages: AllStorages,
+    pub(crate) all_storages: AllStorages,
 }
 
 impl World {
-    #[inline]
-    pub(crate) fn all_storages(&self) -> &AllStorages {
-        &self.all_storages
-    }
-
     /// Spawn a new entity and create a handle for it.
     #[inline]
     pub fn spawn(&mut self) -> EntityMut {
@@ -29,7 +24,7 @@ impl World {
 
     #[inline]
     pub fn insert_unique<T: Any>(&mut self, unique: T) -> Option<()> {
-        self.all_storages.insert_unique(unique)
+        self.all_storages.uniques.insert(unique)
     }
 
     /// Get a query.
@@ -49,7 +44,7 @@ impl World {
 
     /// Register component type.
     pub fn register_components<C: Component>(&mut self) -> Option<()> {
-        self.all_storages.register_components::<C>()
+        self.all_storages.components.insert_storage::<C>()
     }
 
     /// Run a system.
