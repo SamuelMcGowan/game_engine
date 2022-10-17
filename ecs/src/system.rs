@@ -14,6 +14,12 @@ pub enum SystemError<Error> {
     ExecutionError(Error),
 }
 
+impl<Error> From<BorrowError> for SystemError<Error> {
+    fn from(err: BorrowError) -> Self {
+        Self::BorrowError(err)
+    }
+}
+
 pub type SystemResult<T, Error> = Result<T, SystemError<Error>>;
 
 pub trait SystemOutput {
@@ -51,10 +57,7 @@ macro_rules! impl_system {
         {
             #[allow(unused_variables, non_snake_case)]
             fn run(&mut self, world: &'a World) -> SystemResult<Output::Success, Output::Error> {
-                $(let $param = match $param::borrow(world) {
-                    Ok(param) => param,
-                    Err(err) => return Err(SystemError::BorrowError(err)),
-                };)*
+                $(let $param = $param::borrow(world)?;)*
                 (self)($($param,)*).to_result()
             }
         }
