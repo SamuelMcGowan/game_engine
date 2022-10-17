@@ -4,7 +4,7 @@ pub trait System<'a, Params, Output: SystemOutput> {
     fn run(&mut self, world: &'a World) -> SystemResult<Output::Success, Output::Error>;
 }
 
-pub trait SystemParam<'a>: Sized {
+pub trait Query<'a>: Sized {
     fn borrow(world: &'a World) -> BorrowResult<Self>;
 }
 
@@ -44,7 +44,7 @@ impl<S, E> SystemOutput for Result<S, E> {
 
 macro_rules! impl_system {
     ($($param:ident),*) => {
-        impl<'a, Func, Output, $($param: SystemParam<'a>),*>
+        impl<'a, Func, Output, $($param: Query<'a>),*>
         System<'a, ($($param,)*), Output>
         for Func
         where Func: FnMut($($param),*) -> Output, Output: SystemOutput

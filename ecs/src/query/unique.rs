@@ -57,7 +57,7 @@ impl<'a, T: Any> DerefMut for UniqueMut<'a, T> {
     }
 }
 
-impl<'a, T: Any> SystemParam<'a> for Unique<'a, T> {
+impl<'a, T: Any> Query<'a> for Unique<'a, T> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
@@ -66,7 +66,7 @@ impl<'a, T: Any> SystemParam<'a> for Unique<'a, T> {
     }
 }
 
-impl<'a, T: Any> SystemParam<'a> for UniqueMut<'a, T> {
+impl<'a, T: Any> Query<'a> for UniqueMut<'a, T> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {

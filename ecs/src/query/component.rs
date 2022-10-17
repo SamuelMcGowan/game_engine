@@ -67,7 +67,7 @@ impl<'a, C: Component> CompMut<'a, C> {
     }
 }
 
-impl<'a, C: Component> SystemParam<'a> for Comp<'a, C> {
+impl<'a, C: Component> Query<'a> for Comp<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {
@@ -77,7 +77,7 @@ impl<'a, C: Component> SystemParam<'a> for Comp<'a, C> {
     }
 }
 
-impl<'a, C: Component> SystemParam<'a> for CompMut<'a, C> {
+impl<'a, C: Component> Query<'a> for CompMut<'a, C> {
     #[inline]
     fn borrow(world: &'a World) -> BorrowResult<Self> {
         Ok(Self {

@@ -36,14 +36,14 @@ impl World {
     ///
     /// Panics upon failure.
     #[inline]
-    pub fn get<'a, P: SystemParam<'a>>(&'a self) -> P {
+    pub fn get<'a, P: Query<'a>>(&'a self) -> P {
         P::borrow(self).unwrap_or_else(|err| {
             panic!("borrow error: {err:?}");
         })
     }
 
     /// Try to get a query.
-    pub fn try_get<'a, P: SystemParam<'a>>(&'a self) -> BorrowResult<P> {
+    pub fn try_get<'a, P: Query<'a>>(&'a self) -> BorrowResult<P> {
         P::borrow(self)
     }
 
