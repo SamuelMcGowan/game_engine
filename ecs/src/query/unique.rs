@@ -4,6 +4,7 @@ use std::ops::{Deref, DerefMut};
 
 use crate::prelude::*;
 use crate::storage::unique::UniqueStorage;
+use crate::storage::StorageIdx;
 
 pub struct Unique<'a, T: Any> {
     storage: Ref<'a, UniqueStorage<T>>,
@@ -58,19 +59,31 @@ impl<'a, T: Any> DerefMut for UniqueMut<'a, T> {
 }
 
 impl<'a, T: Any> Query<'a> for Unique<'a, T> {
+    type Index = BorrowResult<StorageIdx<UniqueStorage<T>>>;
+
+    fn lookup(world: &mut World) -> Self::Index {
+        world.all_storages.uniques.lookup()
+    }
+
     #[inline]
-    fn borrow(world: &'a World) -> BorrowResult<Self> {
+    fn borrow(world: &'a World, idx: Self::Index) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages.uniques.borrow_ref()?,
+            storage: world.all_storages.uniques.borrow_ref(idx?)?,
         })
     }
 }
 
 impl<'a, T: Any> Query<'a> for UniqueMut<'a, T> {
+    type Index = BorrowResult<StorageIdx<UniqueStorage<T>>>;
+
+    fn lookup(world: &mut World) -> Self::Index {
+        world.all_storages.uniques.lookup()
+    }
+
     #[inline]
-    fn borrow(world: &'a World) -> BorrowResult<Self> {
+    fn borrow(world: &'a World, idx: Self::Index) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages.uniques.borrow_mut()?,
+            storage: world.all_storages.uniques.borrow_mut(idx?)?,
         })
     }
 }

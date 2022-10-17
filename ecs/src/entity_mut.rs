@@ -1,7 +1,7 @@
 use std::cell::RefMut;
 
 use crate::prelude::*;
-use crate::storage::all_storages::AllStorages;
+use crate::storage::all_storages::{AllComponentStorages, AllStorages};
 
 /// A handle to mutate an entity.
 pub struct EntityMut<'a> {
@@ -28,9 +28,13 @@ impl<'a> EntityMut<'a> {
     ///
     /// Panics if the component type is not registered.
     pub fn insert<C: Component>(self, component: C) -> Self {
-        let mut components = self.components_mut::<C>();
-        components.insert(&self.live(), component);
+        let mut components = lookup_or_insert_and_borrow_mut(&mut self.all_storages.components);
+        let entity = self.all_storages.entities.entity_to_alive(self.entity);
+
+        components.insert(&entity, component);
+
         drop(components);
+
         self
     }
 
@@ -38,9 +42,11 @@ impl<'a> EntityMut<'a> {
     ///
     /// Panics if the component type is not registered.
     pub fn remove<C: Component>(self) -> Self {
-        let mut components = self.components_mut::<C>();
-        components.remove(&self.live());
-        drop(components);
+        if let Some(mut components) = lookup_and_borrow_mut::<C>(&mut self.all_storages.components)
+        {
+            let entity = self.all_storages.entities.entity_to_alive(self.entity);
+            components.remove(&entity);
+        }
         self
     }
 
@@ -49,18 +55,23 @@ impl<'a> EntityMut<'a> {
     pub fn id(&self) -> EntityId {
         self.entity
     }
+}
 
-    /// Panics if the component type is not registered.
-    fn components_mut<C: Component>(&self) -> RefMut<ComponentStorage<C>> {
-        self.all_storages
-            .components
-            .borrow_mut::<C>()
-            .expect("component type not registered")
-    }
+fn lookup_and_borrow_mut<C: Component>(
+    all_components: &mut AllComponentStorages,
+) -> Option<RefMut<ComponentStorage<C>>> {
+    let idx = all_components.lookup().ok()?;
+    let components = all_components
+        .borrow_mut(idx)
+        .expect("component type not registered");
+    Some(components)
+}
 
-    fn live(&self) -> LiveEntity {
-        self.all_storages
-            .entity_storage()
-            .entity_to_alive(self.entity)
-    }
+fn lookup_or_insert_and_borrow_mut<C: Component>(
+    all_components: &mut AllComponentStorages,
+) -> RefMut<ComponentStorage<C>> {
+    let idx = all_components.lookup_or_insert();
+    all_components
+        .borrow_mut(idx)
+        .expect("component type not registered")
 }

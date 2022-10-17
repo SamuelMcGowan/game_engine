@@ -5,13 +5,14 @@ pub(crate) mod all_storages;
 pub(crate) mod unique;
 
 mod erased;
-mod erased_new;
 mod sparse_set;
+
+pub(crate) use erased::StorageIdx;
 
 use self::entities::LiveEntity;
 pub use self::sparse_set::{Iter, IterMut};
 
-pub(crate) trait Storage: 'static {
+pub trait Storage: 'static {
     fn remove_entity(&mut self, entity: &LiveEntity);
 }
 

@@ -1,6 +1,7 @@
 use std::cell::{Ref, RefMut};
 
 use crate::prelude::*;
+use crate::storage::StorageIdx;
 
 pub struct Comp<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,
@@ -68,21 +69,35 @@ impl<'a, C: Component> CompMut<'a, C> {
 }
 
 impl<'a, C: Component> Query<'a> for Comp<'a, C> {
+    type Index = StorageIdx<ComponentStorage<C>>;
+
     #[inline]
-    fn borrow(world: &'a World) -> BorrowResult<Self> {
+    fn lookup(world: &mut World) -> Self::Index {
+        world.all_storages.components.lookup_or_insert()
+    }
+
+    #[inline]
+    fn borrow(world: &'a World, idx: Self::Index) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages.components.borrow_ref()?,
-            entities: world.all_storages.entity_storage(),
+            storage: world.all_storages.components.borrow_ref(idx)?,
+            entities: &world.all_storages.entities,
         })
     }
 }
 
 impl<'a, C: Component> Query<'a> for CompMut<'a, C> {
+    type Index = StorageIdx<ComponentStorage<C>>;
+
     #[inline]
-    fn borrow(world: &'a World) -> BorrowResult<Self> {
+    fn lookup(world: &mut World) -> Self::Index {
+        world.all_storages.components.lookup_or_insert()
+    }
+
+    #[inline]
+    fn borrow(world: &'a World, idx: Self::Index) -> BorrowResult<Self> {
         Ok(Self {
-            storage: world.all_storages.components.borrow_mut()?,
-            entities: world.all_storages.entity_storage(),
+            storage: world.all_storages.components.borrow_mut(idx)?,
+            entities: &world.all_storages.entities,
         })
     }
 }

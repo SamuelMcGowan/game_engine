@@ -31,20 +31,15 @@ impl World {
     ///
     /// Panics upon failure.
     #[inline]
-    pub fn get<'a, P: Query<'a>>(&'a self) -> P {
-        P::borrow(self).unwrap_or_else(|err| {
+    pub fn get<'a, P: Query<'a>>(&'a mut self) -> P {
+        P::lookup_and_borrow(self).unwrap_or_else(|err| {
             panic!("borrow error: {err:?}");
         })
     }
 
     /// Try to get a query.
-    pub fn try_get<'a, P: Query<'a>>(&'a self) -> BorrowResult<P> {
-        P::borrow(self)
-    }
-
-    /// Register component type.
-    pub fn register_components<C: Component>(&mut self) -> Option<()> {
-        self.all_storages.components.insert_storage::<C>()
+    pub fn try_get<'a, P: Query<'a>>(&'a mut self) -> BorrowResult<P> {
+        P::lookup_and_borrow(self)
     }
 
     /// Run a system.

@@ -133,7 +133,7 @@ impl EntityStorage {
 
 /// An alive entity.
 #[doc(hidden)]
-pub(crate) struct LiveEntity<'a> {
+pub struct LiveEntity<'a> {
     entity: EntityId,
     _storage: &'a EntityStorage,
 }

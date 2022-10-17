@@ -1,11 +1,21 @@
+use paste::paste;
+
 use crate::prelude::*;
 
 pub trait System<'a, Params, Output: SystemOutput> {
-    fn run(&mut self, world: &'a World) -> SystemResult<Output::Success, Output::Error>;
+    fn run(&mut self, world: &'a mut World) -> SystemResult<Output::Success, Output::Error>;
 }
 
 pub trait Query<'a>: Sized {
-    fn borrow(world: &'a World) -> BorrowResult<Self>;
+    type Index;
+
+    fn lookup(world: &mut World) -> Self::Index;
+    fn borrow(world: &'a World, idx: Self::Index) -> BorrowResult<Self>;
+
+    fn lookup_and_borrow(world: &'a mut World) -> BorrowResult<Self> {
+        let idx = Self::lookup(world);
+        Self::borrow(world, idx)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -56,8 +66,9 @@ macro_rules! impl_system {
         where Func: FnMut($($param),*) -> Output, Output: SystemOutput
         {
             #[allow(unused_variables, non_snake_case)]
-            fn run(&mut self, world: &'a World) -> SystemResult<Output::Success, Output::Error> {
-                $(let $param = $param::borrow(world)?;)*
+            fn run(&mut self, world: &'a mut World) -> SystemResult<Output::Success, Output::Error> {
+                $(let paste!([<$param _idx>]) = $param::lookup(world);)*
+                $(let $param = $param::borrow(world, paste!([<$param _idx>]))?;)*
                 (self)($($param,)*).to_result()
             }
         }

@@ -9,7 +9,6 @@ impl Component for Foo {}
 #[test]
 fn adding_components() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
@@ -21,7 +20,6 @@ fn adding_components() {
 #[test]
 fn remove_a() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
@@ -36,7 +34,6 @@ fn remove_a() {
 #[test]
 fn remove_b() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
@@ -51,7 +48,6 @@ fn remove_b() {
 #[test]
 fn remove_both() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
@@ -69,7 +65,6 @@ fn remove_both() {
 #[test]
 fn remove_twice() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
 
@@ -83,7 +78,6 @@ fn remove_twice() {
 #[test]
 fn add_again() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
     let a_foo = world.get::<CompMut<Foo>>().remove(a);
@@ -99,7 +93,6 @@ fn add_again() {
 #[test]
 fn add_unique() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     world.insert_unique(100usize).unwrap();
     assert_eq!(world.get::<Unique<usize>>().get(), &100usize);
@@ -120,7 +113,6 @@ fn add_unique() {
 #[test]
 fn iter() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
@@ -139,7 +131,6 @@ fn iter() {
 #[test]
 fn system_mut() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let a = world.spawn().insert(Foo(10)).id();
     let b = world.spawn().insert(Foo(20)).id();
@@ -157,7 +148,6 @@ fn system_mut() {
 #[test]
 fn system_failure() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let result = world.run(|| -> Result<(), &'static str> { Err("hello, world!") });
 
@@ -168,7 +158,6 @@ fn system_failure() {
 #[should_panic]
 fn system_borrow_conflict() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     world.spawn().insert(Foo(10));
     world.spawn().insert(Foo(20));
@@ -180,16 +169,8 @@ fn system_borrow_conflict() {
 
 #[test]
 #[should_panic]
-fn storage_missing() {
-    let mut world = World::default();
-    world.spawn().insert(Foo(10));
-}
-
-#[test]
-#[should_panic]
 fn remove_entity() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let entity = world.spawn().insert(Foo(10));
     let a = entity.id();
@@ -202,7 +183,6 @@ fn remove_entity() {
 #[should_panic]
 fn remove_entity_components() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let entity = world.spawn().insert(Foo(10));
     let a = entity.id();
@@ -214,7 +194,6 @@ fn remove_entity_components() {
 #[test]
 fn replace_entity() {
     let mut world = World::default();
-    world.register_components::<Foo>().unwrap();
 
     let entity = world.spawn().insert(Foo(10));
     let a = entity.id();

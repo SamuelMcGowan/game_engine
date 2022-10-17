@@ -1,7 +1,9 @@
 use std::any::{Any, TypeId};
 use std::cell::{Ref, RefCell, RefMut};
-use std::collections::hash_map::{Entry, Values, ValuesMut};
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::marker::PhantomData;
+use std::slice::{Iter, IterMut};
 
 use super::{BorrowError, BorrowResult, Storage};
 
@@ -57,33 +59,74 @@ impl ErasedStorage {
     }
 }
 
+pub struct StorageIdx<T: Any + Storage> {
+    idx: usize,
+    phantom_data: PhantomData<T>,
+}
+
+// By storing the storages inside a `Vec`, storage insertion doesn't
+// invalidate previous lookups, so lookups only have to be performed
+// once.
 #[derive(Default)]
 pub(crate) struct ErasedStorages {
-    storages: HashMap<TypeId, RefCell<ErasedStorage>>,
+    lookup: HashMap<TypeId, usize>,
+    storages: Vec<RefCell<ErasedStorage>>,
 }
 
 impl ErasedStorages {
-    pub fn insert<T: Any + Storage>(&mut self, storage: T) -> Option<()> {
+    /// Panics if the new storage capacity exceeds `isize::MAX` bytes.
+    pub fn insert<T: Any + Storage>(&mut self, storage: T) -> Option<usize> {
         let type_id = TypeId::of::<T>();
 
-        match self.storages.entry(type_id) {
+        match self.lookup.entry(type_id) {
             Entry::Vacant(vacant) => {
-                vacant.insert(RefCell::new(ErasedStorage::new(storage)));
-                Some(())
+                let idx = self.storages.len();
+                let storage = RefCell::new(ErasedStorage::new(storage));
+
+                self.storages.push(storage);
+                vacant.insert(idx);
+
+                Some(idx)
             }
             Entry::Occupied(_) => None,
         }
     }
 
-    pub fn borrow_ref<T: Any + Storage>(&self) -> BorrowResult<Ref<T>> {
+    pub fn lookup<T: Any + Storage>(&self) -> BorrowResult<StorageIdx<T>> {
         let type_id = TypeId::of::<T>();
-
-        let erased_storage = self
-            .storages
+        let idx = self
+            .lookup
             .get(&type_id)
+            .copied()
             .ok_or(BorrowError::StorageNotFound)?;
+        Ok(StorageIdx {
+            idx,
+            phantom_data: PhantomData,
+        })
+    }
 
-        let erased_storage_ref = erased_storage
+    pub fn lookup_or_insert<T: Any + Storage + Default>(&mut self) -> StorageIdx<T> {
+        let type_id = TypeId::of::<T>();
+        let idx = match self.lookup.entry(type_id) {
+            Entry::Vacant(vacant) => {
+                let idx = self.storages.len();
+                let storage = RefCell::new(ErasedStorage::new(T::default()));
+
+                self.storages.push(storage);
+                vacant.insert(idx);
+
+                idx
+            }
+            Entry::Occupied(occupied) => *occupied.get(),
+        };
+        StorageIdx {
+            idx,
+            phantom_data: PhantomData,
+        }
+    }
+
+    pub fn borrow_ref<T: Any + Storage>(&self, idx: StorageIdx<T>) -> BorrowResult<Ref<T>> {
+        let erased_storage_ref = self.storages[idx.idx]
             .try_borrow()
             .map_err(|_| BorrowError::InvalidBorrow)?;
 
@@ -94,15 +137,8 @@ impl ErasedStorages {
         Ok(storage)
     }
 
-    pub fn borrow_mut<T: Any + Storage>(&self) -> BorrowResult<RefMut<T>> {
-        let type_id = TypeId::of::<T>();
-
-        let erased_storage = self
-            .storages
-            .get(&type_id)
-            .ok_or(BorrowError::StorageNotFound)?;
-
-        let erased_storage_mut = erased_storage
+    pub fn borrow_mut<T: Any + Storage>(&self, idx: StorageIdx<T>) -> BorrowResult<RefMut<T>> {
+        let erased_storage_mut = self.storages[idx.idx]
             .try_borrow_mut()
             .map_err(|_| BorrowError::InvalidBorrow)?;
 
@@ -114,15 +150,15 @@ impl ErasedStorages {
     }
 
     pub fn iter_refs(&self) -> ErasedStorageIter {
-        ErasedStorageIter(self.storages.values())
+        ErasedStorageIter(self.storages.iter())
     }
 
     pub fn iter_muts(&mut self) -> ErasedStorageIterMut {
-        ErasedStorageIterMut(self.storages.values_mut())
+        ErasedStorageIterMut(self.storages.iter_mut())
     }
 }
 
-pub(crate) struct ErasedStorageIter<'a>(Values<'a, TypeId, RefCell<ErasedStorage>>);
+pub(crate) struct ErasedStorageIter<'a>(Iter<'a, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIter<'a> {
     type Item = BorrowResult<Ref<'a, dyn Storage>>;
@@ -140,7 +176,7 @@ impl<'a> Iterator for ErasedStorageIter<'a> {
     }
 }
 
-pub(crate) struct ErasedStorageIterMut<'a>(ValuesMut<'a, TypeId, RefCell<ErasedStorage>>);
+pub(crate) struct ErasedStorageIterMut<'a>(IterMut<'a, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIterMut<'a> {
     type Item = BorrowResult<RefMut<'a, dyn Storage>>;

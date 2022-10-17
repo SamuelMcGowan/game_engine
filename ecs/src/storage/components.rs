@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 pub trait Component: 'static {}
 
-pub(crate) struct ComponentStorage<C: Component>(SparseSet<C>);
+pub struct ComponentStorage<C: Component>(SparseSet<C>);
 
 impl<C: Component> Default for ComponentStorage<C> {
     fn default() -> Self {
