@@ -1,7 +1,7 @@
 use std::cell::RefMut;
 
+use crate::all_storages::{AllComponentStorages, AllStorages};
 use crate::prelude::*;
-use crate::storage::all_storages::{AllComponentStorages, AllStorages};
 
 /// A handle to mutate an entity.
 pub struct EntityMut<'a> {

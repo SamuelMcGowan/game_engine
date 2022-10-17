@@ -5,7 +5,8 @@ use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::slice::{Iter, IterMut};
 
-use super::{BorrowError, BorrowResult, Storage};
+use crate::prelude::{BorrowError, BorrowResult};
+use crate::storage::Storage;
 
 // THANKS TO: https://lucumr.pocoo.org/2022/1/7/as-any-hack/
 
@@ -158,7 +159,7 @@ impl ErasedStorages {
     }
 }
 
-pub(crate) struct ErasedStorageIter<'a>(Iter<'a, RefCell<ErasedStorage>>);
+pub struct ErasedStorageIter<'a>(Iter<'a, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIter<'a> {
     type Item = BorrowResult<Ref<'a, dyn Storage>>;
@@ -176,7 +177,7 @@ impl<'a> Iterator for ErasedStorageIter<'a> {
     }
 }
 
-pub(crate) struct ErasedStorageIterMut<'a>(IterMut<'a, RefCell<ErasedStorage>>);
+pub struct ErasedStorageIterMut<'a>(IterMut<'a, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIterMut<'a> {
     type Item = BorrowResult<RefMut<'a, dyn Storage>>;

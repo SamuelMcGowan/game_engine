@@ -1,7 +1,7 @@
 use std::cell::{Ref, RefMut};
 
+use crate::all_storages::erased::StorageIdx;
 use crate::prelude::*;
-use crate::storage::StorageIdx;
 
 pub struct Comp<'a, C: Component> {
     storage: Ref<'a, ComponentStorage<C>>,

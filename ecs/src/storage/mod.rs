@@ -1,13 +1,8 @@
 pub mod components;
 pub mod entities;
 
-pub(crate) mod all_storages;
-pub(crate) mod unique;
-
-mod erased;
 mod sparse_set;
-
-pub(crate) use erased::StorageIdx;
+pub(crate) mod unique;
 
 use self::entities::LiveEntity;
 pub use self::sparse_set::{Iter, IterMut};

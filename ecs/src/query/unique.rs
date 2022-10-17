@@ -2,9 +2,9 @@ use std::any::Any;
 use std::cell::{Ref, RefMut};
 use std::ops::{Deref, DerefMut};
 
+use crate::all_storages::erased::StorageIdx;
 use crate::prelude::*;
 use crate::storage::unique::UniqueStorage;
-use crate::storage::StorageIdx;
 
 pub struct Unique<'a, T: Any> {
     storage: Ref<'a, UniqueStorage<T>>,

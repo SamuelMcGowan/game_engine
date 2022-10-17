@@ -1,3 +1,4 @@
+pub mod all_storages;
 pub mod entity_mut;
 pub mod query;
 pub mod storage;

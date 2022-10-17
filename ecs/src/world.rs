@@ -1,7 +1,7 @@
 use std::any::Any;
 
+use crate::all_storages::AllStorages;
 use crate::prelude::*;
-use crate::storage::all_storages::AllStorages;
 
 /// Central container for ECS data.
 #[derive(Default)]
