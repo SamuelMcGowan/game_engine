@@ -1,2 +1,2 @@
 [workspace]
-members = ["crates/engine", "crates/ecs"]
+members = ["crates/engine", "crates/ecs", "crates/render"]
