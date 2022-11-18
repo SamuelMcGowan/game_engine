@@ -10,6 +10,7 @@ pub mod prelude {
     pub use query::*;
     pub use storage::components::*;
     pub use storage::entities::*;
+    pub use storage::unique::*;
     pub use storage::{BorrowError, BorrowResult, Iter, IterMut};
     pub use system::*;
     pub use world::*;
