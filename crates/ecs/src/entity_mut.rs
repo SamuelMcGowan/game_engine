@@ -19,7 +19,7 @@ impl<'a> EntityMut<'a> {
 
     /// Despawn an entity.
     ///
-    /// Panics if the entity is dear or any storage is borrowed.
+    /// Panics if the entity is dead or any storage is borrowed.
     pub fn despawn(self) {
         self.all_storages.despawn_entity(self.entity);
     }
