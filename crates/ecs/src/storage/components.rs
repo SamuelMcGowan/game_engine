@@ -1,5 +1,5 @@
 use super::sparse_set::SparseSet;
-use super::Storage;
+use super::StorageWithEntities;
 use crate::prelude::*;
 
 pub trait Component: 'static {}
@@ -49,7 +49,7 @@ impl<C: Component> ComponentStorage<C> {
     }
 }
 
-impl<C: Component> Storage for ComponentStorage<C> {
+impl<C: Component> StorageWithEntities for ComponentStorage<C> {
     fn remove_entity(&mut self, entity: &LiveEntity) {
         self.remove(entity);
     }

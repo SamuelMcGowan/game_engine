@@ -4,6 +4,8 @@ pub mod components;
 pub mod erased;
 pub mod uniques;
 
+mod erased_new;
+
 pub use components::AllComponentStorages;
 pub use erased::{ErasedStorageIter, ErasedStorageIterMut, StorageIdx};
 pub use uniques::AllUniqueStorages;

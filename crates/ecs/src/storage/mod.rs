@@ -7,7 +7,7 @@ pub(crate) mod unique;
 use self::entities::LiveEntity;
 pub use self::sparse_set::{Iter, IterMut};
 
-pub trait Storage: 'static {
+pub trait StorageWithEntities: 'static {
     fn remove_entity(&mut self, entity: &LiveEntity);
 }
 

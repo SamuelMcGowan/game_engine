@@ -6,19 +6,19 @@ use std::marker::PhantomData;
 use std::slice::{Iter, IterMut};
 
 use crate::prelude::{BorrowError, BorrowResult};
-use crate::storage::Storage;
+use crate::storage::StorageWithEntities;
 
 // THANKS TO: https://lucumr.pocoo.org/2022/1/7/as-any-hack/
 
-trait AnyStorage: Storage + Any {
+trait AnyStorage: StorageWithEntities + Any {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
-    fn as_storage(&self) -> &dyn Storage;
-    fn as_storage_mut(&mut self) -> &mut dyn Storage;
+    fn as_storage(&self) -> &dyn StorageWithEntities;
+    fn as_storage_mut(&mut self) -> &mut dyn StorageWithEntities;
 }
 
-impl<T: Storage + Any> AnyStorage for T {
+impl<T: StorageWithEntities + Any> AnyStorage for T {
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -27,11 +27,11 @@ impl<T: Storage + Any> AnyStorage for T {
         self
     }
 
-    fn as_storage(&self) -> &dyn Storage {
+    fn as_storage(&self) -> &dyn StorageWithEntities {
         self
     }
 
-    fn as_storage_mut(&mut self) -> &mut dyn Storage {
+    fn as_storage_mut(&mut self) -> &mut dyn StorageWithEntities {
         self
     }
 }
@@ -51,16 +51,16 @@ impl ErasedStorage {
         (*self.0).as_any_mut()
     }
 
-    pub fn as_storage(&self) -> &dyn Storage {
+    pub fn as_storage(&self) -> &dyn StorageWithEntities {
         (*self.0).as_storage()
     }
 
-    pub fn as_storage_mut(&mut self) -> &mut dyn Storage {
+    pub fn as_storage_mut(&mut self) -> &mut dyn StorageWithEntities {
         (*self.0).as_storage_mut()
     }
 }
 
-pub struct StorageIdx<T: Any + Storage> {
+pub struct StorageIdx<T: Any + StorageWithEntities> {
     idx: usize,
     phantom_data: PhantomData<T>,
 }
@@ -76,7 +76,7 @@ pub(crate) struct ErasedStorages {
 
 impl ErasedStorages {
     /// Panics if the new storage capacity exceeds `isize::MAX` bytes.
-    pub fn insert<T: Any + Storage>(&mut self, storage: T) -> Option<usize> {
+    pub fn insert<T: Any + StorageWithEntities>(&mut self, storage: T) -> Option<usize> {
         let type_id = TypeId::of::<T>();
 
         match self.lookup.entry(type_id) {
@@ -93,7 +93,7 @@ impl ErasedStorages {
         }
     }
 
-    pub fn lookup<T: Any + Storage>(&self) -> BorrowResult<StorageIdx<T>> {
+    pub fn lookup<T: Any + StorageWithEntities>(&self) -> BorrowResult<StorageIdx<T>> {
         let type_id = TypeId::of::<T>();
         let idx = self
             .lookup
@@ -106,7 +106,7 @@ impl ErasedStorages {
         })
     }
 
-    pub fn lookup_or_insert<T: Any + Storage + Default>(&mut self) -> StorageIdx<T> {
+    pub fn lookup_or_insert<T: Any + StorageWithEntities + Default>(&mut self) -> StorageIdx<T> {
         let type_id = TypeId::of::<T>();
         let idx = match self.lookup.entry(type_id) {
             Entry::Vacant(vacant) => {
@@ -126,7 +126,7 @@ impl ErasedStorages {
         }
     }
 
-    pub fn borrow_ref<T: Any + Storage>(&self, idx: StorageIdx<T>) -> BorrowResult<Ref<T>> {
+    pub fn borrow_ref<T: Any + StorageWithEntities>(&self, idx: StorageIdx<T>) -> BorrowResult<Ref<T>> {
         let erased_storage_ref = self.storages[idx.idx]
             .try_borrow()
             .map_err(|_| BorrowError::InvalidBorrow)?;
@@ -138,7 +138,7 @@ impl ErasedStorages {
         Ok(storage)
     }
 
-    pub fn borrow_mut<T: Any + Storage>(&self, idx: StorageIdx<T>) -> BorrowResult<RefMut<T>> {
+    pub fn borrow_mut<T: Any + StorageWithEntities>(&self, idx: StorageIdx<T>) -> BorrowResult<RefMut<T>> {
         let erased_storage_mut = self.storages[idx.idx]
             .try_borrow_mut()
             .map_err(|_| BorrowError::InvalidBorrow)?;
@@ -162,7 +162,7 @@ impl ErasedStorages {
 pub struct ErasedStorageIter<'a>(Iter<'a, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIter<'a> {
-    type Item = BorrowResult<Ref<'a, dyn Storage>>;
+    type Item = BorrowResult<Ref<'a, dyn StorageWithEntities>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(|erased_storage| {
@@ -180,7 +180,7 @@ impl<'a> Iterator for ErasedStorageIter<'a> {
 pub struct ErasedStorageIterMut<'a>(IterMut<'a, RefCell<ErasedStorage>>);
 
 impl<'a> Iterator for ErasedStorageIterMut<'a> {
-    type Item = BorrowResult<RefMut<'a, dyn Storage>>;
+    type Item = BorrowResult<RefMut<'a, dyn StorageWithEntities>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(|erased_storage| {
