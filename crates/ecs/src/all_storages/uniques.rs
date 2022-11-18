@@ -1,12 +1,28 @@
 use std::any::Any;
 use std::cell::{Ref, RefMut};
 
-use super::erased::{ErasedStorages, StorageIdx};
+use super::erased::*;
 use crate::prelude::*;
 use crate::storage::unique::UniqueStorage;
 
+impl<T: Any> ErasableStorage for UniqueStorage<T> {
+    type ErasedStorage = Box<dyn Any>;
+
+    fn erase(self) -> Self::ErasedStorage {
+        Box::new(self)
+    }
+
+    fn downcast_ref(erased: &Self::ErasedStorage) -> Option<&Self> {
+        erased.downcast_ref()
+    }
+
+    fn downcast_mut(erased: &mut Self::ErasedStorage) -> Option<&mut Self> {
+        erased.downcast_mut()
+    }
+}
+
 #[derive(Default)]
-pub struct AllUniqueStorages(ErasedStorages);
+pub struct AllUniqueStorages(ErasedStorages<Box<dyn Any>>);
 
 impl AllUniqueStorages {
     #[inline]

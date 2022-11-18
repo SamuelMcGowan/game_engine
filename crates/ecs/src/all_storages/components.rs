@@ -1,10 +1,26 @@
 use std::cell::{Ref, RefMut};
 
-use super::erased::{ErasedStorageIter, ErasedStorageIterMut, ErasedStorages, StorageIdx};
+use super::erased::*;
 use crate::prelude::*;
 
+impl<C: Component> ErasableStorage for ComponentStorage<C> {
+    type ErasedStorage = ErasedStorageWithEntities;
+
+    fn erase(self) -> Self::ErasedStorage {
+        ErasedStorageWithEntities::new(self)
+    }
+
+    fn downcast_ref(erased: &Self::ErasedStorage) -> Option<&Self> {
+        erased.downcast_ref()
+    }
+
+    fn downcast_mut(erased: &mut Self::ErasedStorage) -> Option<&mut Self> {
+        erased.downcast_mut()
+    }
+}
+
 #[derive(Default)]
-pub struct AllComponentStorages(ErasedStorages);
+pub struct AllComponentStorages(ErasedStorages<ErasedStorageWithEntities>);
 
 impl AllComponentStorages {
     #[inline]
@@ -34,12 +50,12 @@ impl AllComponentStorages {
     }
 
     #[inline]
-    pub fn iter_refs(&self) -> ErasedStorageIter {
+    pub fn iter_refs(&self) -> ErasedStorageIter<ErasedStorageWithEntities> {
         self.0.iter_refs()
     }
 
     #[inline]
-    pub fn iter_muts(&mut self) -> ErasedStorageIterMut {
+    pub fn iter_muts(&mut self) -> ErasedStorageIterMut<ErasedStorageWithEntities> {
         self.0.iter_muts()
     }
 }

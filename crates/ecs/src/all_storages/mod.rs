@@ -1,14 +1,14 @@
 use crate::prelude::*;
+use crate::storage::StorageWithEntities;
 
 pub mod components;
 pub mod erased;
 pub mod uniques;
 
-mod erased_new;
+pub use erased::{ErasedStorageIter, ErasedStorageIterMut};
 
-pub use components::AllComponentStorages;
-pub use erased::{ErasedStorageIter, ErasedStorageIterMut, StorageIdx};
-pub use uniques::AllUniqueStorages;
+pub(crate) use components::AllComponentStorages;
+pub(crate) use uniques::AllUniqueStorages;
 
 #[derive(Default)]
 pub struct AllStorages {
