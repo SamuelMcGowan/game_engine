@@ -6,13 +6,9 @@ A tiny ECS library with no unsafe code.
 
 ### Immediate
 
-- [x] Clean up imports.
-- [x] Delete an entity from all component storages.
-- [x] Automatically register component storages.
 - [ ] Iterate over live entities.
   - Sacrifice 1 bit of the generation to mark in-use identifiers.
 - [ ] Re-check API related to live entities (contracts & performance).
-- [x] Despawn entities.
 
 ## Later
 
