@@ -1,8 +1,8 @@
 pub mod components;
 pub mod entities;
+pub mod unique;
 
 mod sparse_set;
-pub(crate) mod unique;
 
 use self::entities::LiveEntity;
 pub use self::sparse_set::{Iter, IterMut};
