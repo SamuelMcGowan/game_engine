@@ -26,7 +26,7 @@ impl AllStorages {
 
     /// Despawn an entity.
     ///
-    /// Panics if the entity is dear or any storage is borrowed.
+    /// Panics if the entity is dead or any storage is borrowed.
     pub(crate) fn despawn_entity(&mut self, entity: EntityId) {
         let live_entity = self.entities.entity_to_alive(entity);
 
